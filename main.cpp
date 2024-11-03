@@ -4,18 +4,19 @@
 #include <fstream>
 #include <sstream>
 #include <nlohmann/json.hpp> 
-#include "UserDataBase.h"
+#include <cassert>
+#include "DataBase.h"
 #include "DIY_Error.h"
 
 using namespace std;
 using json = nlohmann::json;
 
-void initialiseDatabase(UserDatabase& database);
+void initialiseDatabase(Database& database);
 string load_html(const string& path);
 
 
 int main() {
-    UserDatabase database;
+    Database database("Cards.db");
     initialiseDatabase(database);
 
     crow::SimpleApp app;
@@ -47,14 +48,14 @@ int main() {
     });
 
     // Route to handle form submissions
-    CROW_ROUTE(app, "/authorization").methods("POST"_method)([](const crow::request& req) {
+    CROW_ROUTE(app, "/authorization").methods("POST"_method)([&database](const crow::request& req) {
         // Parse the JSON body
         auto data = json::parse(req.body); 
         std::string card_number = data["cardNumber"]; 
         std::string card_pin = data["pin"];
 
-        bool isCardNumberValid = (card_number == "1234567812345678"); // Example validation
-        bool isPinValid = (card_pin == "1234");
+        bool isCardNumberValid = database.isCardValid(card_number);
+        bool isPinValid = database.isPinCorrect(card_number, card_pin);
 
         // Respond back to the client 
         json response;
@@ -69,11 +70,15 @@ int main() {
     return 0;
 }
 
-void initialiseDatabase(UserDatabase& database) {
-    database.addCard("1111111111111111", "1111");
-    database.addCard("2222222222222222", "2222");
-    database.addCard("3333333333333333", "3333");
-    database.addCard("4444444444444444", "4444");
+void initialiseDatabase(Database& database) {
+    database.createCardsTable();
+
+    database.insertCard("1111111111111111", "1111", 111.1);
+    database.insertCard("2222222222222222", "2222", 222.2);
+    database.insertCard("3333333333333333", "3333", 333.3);
+    if (database.insertCard("1111111111111111", "1111", 111.1))
+        assert(false);
+    
 }
 
 string load_html(const string& path) {
