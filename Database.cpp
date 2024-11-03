@@ -1,6 +1,7 @@
 #include "Database.h"
 #include <iostream>
 #include <regex>
+#include <nlohmann/json.hpp> 
 using namespace std;
 
 Database::Database(const string& dbName) {
@@ -19,8 +20,7 @@ Database::~Database() {
 
 bool Database::createCardsTable() {
     const char* sql = "CREATE TABLE IF NOT EXISTS Cards("
-        "CardID INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "CardNumber TEXT NOT NULL, "
+        "CardNumber TEXT NOT NULL PRIMARY KEY, "
         "PIN TEXT NOT NULL, "
         "CurrentBalance REAL NOT NULL);";
     char* errorMessage = 0;
@@ -79,14 +79,14 @@ bool Database::insertCard(const string& cardNumber, const string& pin, double ba
     return true;
 }
 
-bool Database::addMoney(int cardId, double amount) {
+bool Database::addMoney(const string& cardNumber, double amount) {
     if (amount <= 0) {
         cerr << "Error: Amount must be positive." << endl;
         return false;
     }
 
     // Update the balance by adding the amount
-    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance + " + to_string(amount) + " WHERE CardID = " + to_string(cardId) + ";";
+    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance + " + to_string(amount) + " WHERE CardNumber = " + cardNumber + ";";
     char* errorMessage = nullptr;
     int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
     if (exit != SQLITE_OK) {
@@ -97,7 +97,7 @@ bool Database::addMoney(int cardId, double amount) {
     return true;
 }
 
-bool Database::withdrawMoney(int cardId, double amount) {
+bool Database::removeMoney(const string& cardNumber, double amount) {
     if (amount <= 0) {
         cerr << "Error: Amount must be positive." << endl;
         return false;
@@ -105,7 +105,7 @@ bool Database::withdrawMoney(int cardId, double amount) {
 
     // Check the current balance first
     double currentBalance;
-    string sqlCheck = "SELECT CurrentBalance FROM Cards WHERE CardID = " + to_string(cardId) + ";";
+    string sqlCheck = "SELECT CurrentBalance FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
@@ -131,7 +131,7 @@ bool Database::withdrawMoney(int cardId, double amount) {
     }
 
     // Update the balance by subtracting the amount
-    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance - " + to_string(amount) + " WHERE CardID = " + to_string(cardId) + ";";
+    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance - " + to_string(amount) + " WHERE CardCunuber = " + cardNumber + ";";
     char* errorMessage = nullptr;
     int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
     if (exit != SQLITE_OK) {
@@ -196,8 +196,8 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
     return false; // PIN does not match or query failed
 }
 
-bool Database::getCardDetails(int cardId, string& cardNumber, string& pin, double& balance) {
-    string sql = "SELECT CardNumber, PIN, CurrentBalance FROM Cards WHERE CardID = " + to_string(cardId) + ";";
+nlohmann::json Database::getCardDetails(const string& cardNumber) {
+    string sql = "SELECT * FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
@@ -205,18 +205,29 @@ bool Database::getCardDetails(int cardId, string& cardNumber, string& pin, doubl
         return false;
     }
 
+    nlohmann::json jsonData;
+
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        cardNumber = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        pin = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        balance = sqlite3_column_double(stmt, 2);
-        sqlite3_finalize(stmt);
-        return true;
+        string cardNumber = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        string pin = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        double balance = sqlite3_column_double(stmt, 2);
+
+        jsonData["cardNumber"] = cardNumber;
+        jsonData["pin"] = pin;
+        jsonData["balance"] = balance;
+    }
+    else {
+        assert(false);
     }
 
     sqlite3_finalize(stmt);
-    return false; // No record found
+    return jsonData; // No record found
 }
 
 void Database::close() {
     sqlite3_close(db);
 }
+
+
+
+

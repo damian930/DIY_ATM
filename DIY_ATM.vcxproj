@@ -141,17 +141,13 @@
   <ItemGroup>
     <ClCompile Include="ATM.cpp" />
     <ClCompile Include="Database.cpp" />
-    <ClCompile Include="JWT_Handler.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ATM.h" />
     <ClInclude Include="DataBase.h" />
-    <ClInclude Include="DIY_Error.h" />
-    <ClInclude Include="JWT_Handler.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Cards.db" />
     <None Include="index.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

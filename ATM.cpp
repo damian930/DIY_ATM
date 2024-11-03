@@ -1,31 +1,31 @@
 #include "ATM.h"
 
-ATM::ATM()
-	:currentState(State::Idle) {}
+ATM::ATM(Database& db)
+	:currentState(State::Idle), bank(db) {}
 
 ATM::~ATM()
 {
 	delete currentSession;
 }
 
-ATM::AccInfo ATM::getAccInfo(long long cardNum)
+const auto& ATM::getAccInfo(const string& cardNum)
 {
-	return { 1111222233334444, 1111, "Yurii", 10.50 };
+	return cardNum;
 }
 
-void ATM::setAccBalance(long long cardNum, float)
+bool ATM::changeAccBalance(const string& cardNum, double)
 {
-	return;
+	return false;
 }
 
-int ATM::authenticator(long long cardNum, int pin)
+int ATM::authenticator(const string& cardNum, const string& pin)
 {
-	if (checkInDB(cardNum) == false)
+	if (bank.isCardValid(cardNum) == false)
 	{
 		setState(State::Idle);
 		return 1; // no such a card
 	}
-	if (pin != getAccInfo(cardNum).PIN)
+	if (bank.isPinCorrect(cardNum, pin))
 	{
 		// ++wrong_pin
 		if (true /*<3*/)
@@ -38,7 +38,7 @@ int ATM::authenticator(long long cardNum, int pin)
 			return 3; // the card was blocked
 		}
 	}
-	currentSession = new Session(*this, new AccInfo(getAccInfo(cardNum)) );
+	currentSession = new Session(*this, cardNum);
 	setState(State::ActionMenu);
 	return 0; // everything is great
 }
@@ -50,11 +50,11 @@ inline void ATM::closeSession()
 	delete currentSession;
 }
 
-ATM::Session::~Session() { delete _info; }
+ATM::Session::~Session() {}
 
-inline const ATM::AccInfo& ATM::Session::accInfo()
+inline const auto& ATM::Session::accInfo()
 {
-	return *_info;
+	return _cardNum;
 }
 
 inline void ATM::Session::exit()
@@ -62,45 +62,37 @@ inline void ATM::Session::exit()
 	_atm.closeSession();
 }
 
-bool ATM::Session::withdraw(float amount)
+inline bool ATM::Session::withdraw(double amount)
 {
-	if (_atm.getAccInfo(_info->cardNum).balance >= amount) // strict db check
-	{
-		_atm.setAccBalance(_info->cardNum, _info->balance - amount);
-		// give the cash
-		return true;
-	}
-	return false;
+	// give the cash
+	return _atm.changeAccBalance(_cardNum, -amount);
 }
 
-void ATM::Session::deposit()
+inline void ATM::Session::deposit(double amount)
 {
+	// should have read amount from money-reader but we don't have it
+	_atm.changeAccBalance(_cardNum, amount);
 	return;
 }
 
-int ATM::Session::transfer(long long recipient, float amount)
+int ATM::Session::transfer(const string& recipient, double amount)
 {
 	if (_atm.checkInDB(recipient) == false)
 	{
 		return 1; // no such a card
 	}
-	if (_atm.getAccInfo(_info->cardNum).balance < amount) // strict db check
-	{
+	if (_atm.changeAccBalance(_cardNum, -amount) == false)
 		return 2; // not enough money
-	}
-	_atm.setAccBalance(_info->cardNum, _info->balance - amount);
-	_atm.setAccBalance(recipient, _info->balance + amount);
+	if (_atm.changeAccBalance(recipient, amount) == false)
+		return 3; // huh?
 
 	return 0;
 }
 
-int ATM::Session::paymentMenu(ATM::Session::PayMenu act, string id, float amount)
+int ATM::Session::paymentMenu(ATM::Session::PayMenu act, const string& id, double amount)
 {
-	if (_atm.getAccInfo(_info->cardNum).balance < amount) // strict db check
-	{
+	if (_atm.changeAccBalance(_cardNum, -amount) == false)
 		return 2; // not enough money
-	}
-	_atm.setAccBalance(_info->cardNum, _info->balance - amount);
-	// send a check to owner
+	// send a check to the owner
 	return 0;
 }
