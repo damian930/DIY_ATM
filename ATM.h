@@ -4,11 +4,18 @@
 class ATM
 {
 public:
+	class Session;
+	friend class ATM::Session;
 	enum class State;
 
 	ATM(Database& db);
 	~ATM();
 
+	int authenticator(const string& cardNum, const string& pin);
+	Session& getSession();
+	void closeSession();
+
+private:
 	void setState(State state) { currentState = state; }
 	State getState() { return currentState; }
 
@@ -16,12 +23,7 @@ public:
 	const auto& getAccInfo(const string& cardNum);
 	bool changeAccBalance(const string& cardNum, double);
 
-	int authenticator(const string& cardNum, const string& pin);
-	void closeSession();
-
-private:
-	class Session;
-
+	int wrongPINtimes = 0;
 	Database& bank;
 	Session* currentSession = nullptr;
 	State currentState;
@@ -30,6 +32,7 @@ private:
 class ATM::Session
 {
 	friend int ATM::authenticator(const string& cardNum, const string& pin);
+	friend Session& ATM::getSession();
 
 public:
 	enum class PayMenu;

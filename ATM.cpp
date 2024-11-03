@@ -10,12 +10,19 @@ ATM::~ATM()
 
 const auto& ATM::getAccInfo(const string& cardNum)
 {
-	return cardNum;
+	return bank.getCardDetails(cardNum);
 }
 
-bool ATM::changeAccBalance(const string& cardNum, double)
+bool ATM::changeAccBalance(const string& cardNum, double amount)
 {
-	return false;
+	if (amount >= 0)
+	{
+		 bank.addMoney(cardNum, amount);
+	}
+	else
+	{
+		return bank.removeMoney(cardNum, -amount);
+	}
 }
 
 int ATM::authenticator(const string& cardNum, const string& pin)
@@ -27,20 +34,28 @@ int ATM::authenticator(const string& cardNum, const string& pin)
 	}
 	if (bank.isPinCorrect(cardNum, pin))
 	{
-		// ++wrong_pin
-		if (true /*<3*/)
+		++wrongPINtimes;
+		if (wrongPINtimes < 3)
 		{
 			return 2; // wrong pin
 		}
 		else
 		{
+			// eat_the_card()
 			setState(State::Idle);
 			return 3; // the card was blocked
 		}
 	}
+	wrongPINtimes = 0;
 	currentSession = new Session(*this, cardNum);
 	setState(State::ActionMenu);
 	return 0; // everything is great
+}
+
+ATM::Session& ATM::getSession()
+{
+	assert(currentSession == nullptr);
+	return *currentSession;
 }
 
 inline void ATM::closeSession()
@@ -54,7 +69,7 @@ ATM::Session::~Session() {}
 
 inline const auto& ATM::Session::accInfo()
 {
-	return _cardNum;
+	return _atm.getAccInfo(_cardNum);
 }
 
 inline void ATM::Session::exit()
