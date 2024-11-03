@@ -8,50 +8,69 @@ ATM::~ATM()
 	delete currentSession;
 }
 
-
-ATM::AccInfo ATM::getAccInfo(int cardNum)
+ATM::AccInfo ATM::getAccInfo(long long cardNum)
 {
-	return { 1111, 1111, "Yurii", 10.50 };
+	return { 1111222233334444, 1111, "Yurii", 10.50 };
 }
 
-void ATM::setAccInfo(ATM::AccInfo info, int cardNum)
+void ATM::setAccBalance(long long cardNum, float)
 {
 	return;
+}
+
+int ATM::authenticator(long long cardNum, int pin)
+{
+	if (checkInDB(cardNum) == false)
+	{
+		setState(State::Idle);
+		return 1; // no such a card
+	}
+	if (pin != getAccInfo(cardNum).PIN)
+	{
+		// ++wrong_pin
+		if (true /*<3*/)
+		{
+			return 2; // wrong pin
+		}
+		else
+		{
+			setState(State::Idle);
+			return 3; // the card was blocked
+		}
+	}
+	currentSession = new Session(*this, new AccInfo(getAccInfo(cardNum)) );
+	setState(State::ActionMenu);
+	return 0; // everything is great
+}
+
+inline void ATM::closeSession()
+{
+	// return the card command
+	setState(State::Idle);
+	delete currentSession;
 }
 
 ATM::Session::~Session() { delete _info; }
 
-void ATM::Session::authenticator()
+inline const ATM::AccInfo& ATM::Session::accInfo()
 {
+	return *_info;
+}
 
-	// asks card num
-	// asks pin
-	int cardNum = 0;
-	int pin = 0;
+inline void ATM::Session::exit()
+{
+	_atm.closeSession();
+}
 
-	if (pin != atm.getAccInfo(cardNum).PIN)
+bool ATM::Session::withdraw(float amount)
+{
+	if (_atm.getAccInfo(_info->cardNum).balance >= amount) // strict db check
 	{
-		// +1
-		atm.setState(State::Idle);
+		_atm.setAccBalance(_info->cardNum, _info->balance - amount);
+		// give the cash
+		return true;
 	}
-	_info = new AccInfo(atm.getAccInfo(cardNum));
-	atm.setState(State::ActionMenu);
-}
-
-void ATM::Session::accInfo()
-{
-	// show(info)
-}
-
-void ATM::Session::exit()
-{
-	// return card
-	atm.setState(State::Idle);
-}
-
-void ATM::Session::withdraw()
-{
-	return;
+	return false;
 }
 
 void ATM::Session::deposit()
@@ -59,12 +78,29 @@ void ATM::Session::deposit()
 	return;
 }
 
-void ATM::Session::transfer()
+int ATM::Session::transfer(long long recipient, float amount)
 {
-	return;
+	if (_atm.checkInDB(recipient) == false)
+	{
+		return 1; // no such a card
+	}
+	if (_atm.getAccInfo(_info->cardNum).balance < amount) // strict db check
+	{
+		return 2; // not enough money
+	}
+	_atm.setAccBalance(_info->cardNum, _info->balance - amount);
+	_atm.setAccBalance(recipient, _info->balance + amount);
+
+	return 0;
 }
 
-void ATM::Session::paymentMenu()
+int ATM::Session::paymentMenu(ATM::Session::PayMenu act, string id, float amount)
 {
-	return;
+	if (_atm.getAccInfo(_info->cardNum).balance < amount) // strict db check
+	{
+		return 2; // not enough money
+	}
+	_atm.setAccBalance(_info->cardNum, _info->balance - amount);
+	// send a check to owner
+	return 0;
 }

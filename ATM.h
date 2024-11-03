@@ -14,9 +14,12 @@ public:
 	void setState(State state) { currentState = state; }
 	State getState() { return currentState; }
 
-	AccInfo getAccInfo(int cardNum);
-	void setAccInfo(AccInfo info, int cardNum);
+	bool checkInDB(long long cardNum) { return true; };
+	AccInfo getAccInfo(long long cardNum);
+	void setAccBalance(long long cardNum, float);
 
+	int authenticator(long long cardNum, int pin);
+	void closeSession();
 
 private:
 	class Session;
@@ -27,38 +30,48 @@ private:
 
 class ATM::Session
 {
-public:
+	friend int ATM::authenticator(long long cardNum, int pin);
 
-	Session(ATM& myatm) :atm(myatm), _info(nullptr) {}
+public:
+	enum class PayMenu;
 	~Session();
 
-	void authenticator();
-
 	void exit();
-	void accInfo();
-	void withdraw();
+	const ATM::AccInfo& accInfo();
+	bool withdraw(float);
 	void deposit();
-	void transfer();
-	void paymentMenu();
+	int transfer(long long, float);
+	int paymentMenu(PayMenu, string, float);
 	
 private:
+	Session(ATM& myatm, ATM::AccInfo* info) :_atm(myatm), _info(info) {}
 
-	ATM& atm;
-	AccInfo* _info;
+	ATM& _atm;
+	ATM::AccInfo* _info;
 };
 
 struct ATM::AccInfo
 {
-	int cardNum;
+	long long cardNum;
 	int PIN;
 	string fullName;
 	float balance;
 };
 
-enum class ATM::State 
+enum class ATM::State
 {
 	Mntnc = 0,
 	Idle,
 	Authorization,
 	ActionMenu
+};
+
+enum class ATM::Session::PayMenu
+{
+	UtilityServices,
+	TravelCard,
+	Charity,
+	InfoTeleCom,
+	Steam,
+	Gambling
 };
