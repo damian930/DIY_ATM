@@ -13,18 +13,6 @@ const auto& ATM::getAccInfo(const string& cardNum)
 	return bank.getCardDetails(cardNum);
 }
 
-bool ATM::changeAccBalance(const string& cardNum, double amount)
-{
-	if (amount >= 0)
-	{
-		 bank.addMoney(cardNum, amount);
-	}
-	else
-	{
-		return bank.removeMoney(cardNum, -amount);
-	}
-}
-
 int ATM::authenticator(const string& cardNum, const string& pin)
 {
 	if (bank.isCardValid(cardNum) == false)
@@ -54,13 +42,13 @@ int ATM::authenticator(const string& cardNum, const string& pin)
 
 ATM::Session& ATM::getSession()
 {
-	assert(currentSession == nullptr);
+	assert(currentSession != nullptr);
 	return *currentSession;
 }
 
 inline void ATM::closeSession()
 {
-	// return the card command
+	// return_the_card()
 	setState(State::Idle);
 	delete currentSession;
 }
@@ -107,10 +95,11 @@ int ATM::Session::transfer(const string& recipient, double amount)
 	return 0;
 }
 
-int ATM::Session::paymentMenu(ATM::Session::PayMenu act, const string& id, double amount)
+int ATM::Session::paymentMenu(/*ATM::Session::PayMenu act,*/ const string& id, double amount)
 {
-	if (_atm.changeAccBalance(_cardNum, -amount) == false)
-		return 2; // not enough money
+	if (_atm.bank.getCardBalance(_cardNum) < amount) return 2;
+	bool asrt = _atm.bank.removeMoney(_cardNum, -amount);
+	assert(!asrt);
 	// send a check to the owner
 	return 0;
 }

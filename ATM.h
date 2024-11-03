@@ -20,7 +20,6 @@ private:
 
 	bool checkInDB(const string& cardNum) { return bank.isCardValid(cardNum);};
 	const auto& getAccInfo(const string& cardNum);
-	bool changeAccBalance(const string& cardNum, double);
 
 	int wrongPINtimes = 0;
 	Database& bank;
@@ -36,13 +35,12 @@ class ATM::Session
 public:
 	enum class PayMenu;
 	~Session();
-	//bool foo(double);
 	void exit();
 	const auto& accInfo();
 	bool withdraw(double);
 	void deposit(double);
 	int transfer(const string&, double);
-	int paymentMenu(PayMenu, const string&, double);
+	int paymentMenu(/*PayMenu,*/ const string&, double);
 	
 private:
 	Session(ATM& myatm, const string& info) :_atm(myatm), _cardNum(info) {}
