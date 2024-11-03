@@ -196,6 +196,29 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
     return false; // PIN does not match or query failed
 }
 
+double Database::getCardBalance(const string& cardNumber) {
+    string sql = "SELECT CurrentBalance FROM Cards WHERE CardNumber = " + cardNumber + ";";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+
+    nlohmann::json jsonData;
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        double balance = sqlite3_column_double(stmt, 0);
+        return balance;
+    }
+    else {
+        assert(false);
+    }
+
+    sqlite3_finalize(stmt);
+    return jsonData; // No record found
+}
+
 nlohmann::json Database::getCardDetails(const string& cardNumber) {
     string sql = "SELECT * FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;

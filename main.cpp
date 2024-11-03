@@ -74,9 +74,7 @@ int main() {
 		auto data = json::parse(req.body);
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 		
-		diyATM.getSession();
-		//bool success = diyATM.getSession().withdraw(amount);
-		bool success = true;
+		bool success = diyATM.getSession().withdraw(amount);
 		// true if good, false if not enough money
 		if (success) {
 
@@ -88,66 +86,59 @@ int main() {
 		}
 	});
 
-	//// Route to handle transferring to another card
-	//CROW_ROUTE(app, "/transfer_to_card").methods("POST"_method)([&diyATM](const crow::request& req)
-	//{
-	//	// Parse the JSON body
-	//	auto data = json::parse(req.body);
-	//	std::string card_number_to = data["cardNumber_to"];
-	//	double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
+	// Route to handle transferring to another card
+	CROW_ROUTE(app, "/transfer_to_card").methods("POST"_method)([&diyATM](const crow::request& req)
+	{
+		// Parse the JSON body
+		auto data = json::parse(req.body);
+		std::string card_number_to = data["cardNumber_to"];
+		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-	//	int success = diyATM.getSession().transfer(card_number_to, amount);
-	//	// 0 - good; 1 - no card; 2 - no money; 3 - huh?
-	//	if (success == 0) {
-	//		crow::response res(302);
-	//		res.set_header("Location", "/");
+		int success = diyATM.getSession().transfer(card_number_to, amount);
+		// 0 - good; 1 - no card; 2 - no money; 3 - huh?
+		if (success == 0) {
+			crow::response res(302);
+			res.set_header("Location", "/");
 
-	//		return res;
-	//	}
-	//	else {
-	//		//
-	//	} });
+			return res;
+		}
+		else {
+			//
+		} });
 
-	//// Route to handle topping up the card
-	//CROW_ROUTE(app, "/top_up_the_card").methods("POST"_method)([&diyATM](const crow::request& req)
-	//{
-	//	// Parse the JSON body
-	//	auto data = json::parse(req.body);
-	//	double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
+	// Route to handle topping up the card
+	CROW_ROUTE(app, "/top_up_the_card").methods("POST"_method)([&diyATM](const crow::request& req)
+	{
+		// Parse the JSON body
+		auto data = json::parse(req.body);
+		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-	//	diyATM.getSession().deposit(amount);
+		diyATM.getSession().deposit(amount);
+		crow::response res(302);
+		res.set_header("Location", "/");
+		return res;
+	});
 
-	//	if (true) {
-	//		crow::response res(302);
-	//		res.set_header("Location", "/");
+	// Route to handle payments
+	CROW_ROUTE(app, "/payments").methods("POST"_method)([&diyATM](const crow::request& req)
+	{
+		// Parse the JSON body
+		auto data = json::parse(req.body);
+		string address = data["address"];
+		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-	//		return res;
-	//	}
-	//	else {
-	//		//assert(false);
-	//	} });
-
-	//// Route to handle payments
-	//CROW_ROUTE(app, "/payments").methods("POST"_method)([&diyATM](const crow::request& req)
-	//{
-	//	// Parse the JSON body
-	//	auto data = json::parse(req.body);
-	//	std::string card_number = data["cardNumber"];
-	//	std::string card_pin = data["pin"];
-	//	double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
-
-	//	bool success = diyATM.getSession().withdraw(amount);
-	//	// withdraw because we don't really send money to anyone
-	//	// true if good, false if not enough money
-	//	if (success) {
+		// withdraw because we don't really send money to anyone
+		bool success = diyATM.getSession().withdraw(amount);
+		// true if good, false if not enough money
+		if (success) {
 
 
-	//		crow::response res(302);
-	//		res.set_header("Location", "/");
+			crow::response res(302);
+			res.set_header("Location", "/");
 
-	//		return res;
-	//	}
-	//	});
+			return res;
+		}
+	});
 
 	app.port(8000).multithreaded().run();
 

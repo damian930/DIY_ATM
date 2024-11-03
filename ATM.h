@@ -5,7 +5,6 @@ class ATM
 {
 public:
 	class Session;
-	friend class ATM::Session;
 	enum class State;
 
 	ATM(Database& db);
@@ -37,7 +36,7 @@ class ATM::Session
 public:
 	enum class PayMenu;
 	~Session();
-
+	//bool foo(double);
 	void exit();
 	const auto& accInfo();
 	bool withdraw(double);

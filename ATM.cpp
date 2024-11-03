@@ -77,29 +77,32 @@ inline void ATM::Session::exit()
 	_atm.closeSession();
 }
 
-inline bool ATM::Session::withdraw(double amount)
+bool ATM::Session::withdraw(double amount)
 {
-	// give the cash
-	return _atm.changeAccBalance(_cardNum, -amount);
+	if (_atm.bank.getCardBalance(_cardNum) < amount) return false;
+	bool asrt = _atm.bank.removeMoney(_cardNum, amount);
+	assert(!asrt);
+	// give_cash()
+	return true;
 }
 
-inline void ATM::Session::deposit(double amount)
+void ATM::Session::deposit(double amount)
 {
 	// should have read amount from money-reader but we don't have it
-	_atm.changeAccBalance(_cardNum, amount);
-	return;
+	bool asrt = _atm.bank.addMoney(_cardNum, amount);
+	assert(asrt);
 }
 
 int ATM::Session::transfer(const string& recipient, double amount)
 {
 	if (_atm.checkInDB(recipient) == false)
-	{
 		return 1; // no such a card
-	}
-	if (_atm.changeAccBalance(_cardNum, -amount) == false)
+	if (_atm.bank.getCardBalance(_cardNum) < amount)
 		return 2; // not enough money
-	if (_atm.changeAccBalance(recipient, amount) == false)
-		return 3; // huh?
+
+	bool a = _atm.bank.removeMoney(_cardNum, amount);
+	bool b = _atm.bank.addMoney(recipient, amount);
+	assert(a && b);
 
 	return 0;
 }
