@@ -3,18 +3,31 @@
 ATM::ATM(Database& db)
 	:currentState(State::Idle), bank(db) {}
 
-ATM::~ATM()
-{
-	delete currentSession;
-}
+//ATM::~ATM()
+//{
+//	delete currentSession;
+//}
 
-const auto& ATM::getAccInfo(const string& cardNum)
+nlohmann::json ATM::getAccInfo(const string& cardNum)
 {
 	return bank.getCardDetails(cardNum);
 }
 
+bool ATM::start()
+{
+	if (getState() == ATM::State::Idle)
+	{
+		setState(ATM::State::Authorization);
+		return true;
+	}
+	else 
+		return false;
+}
+
 int ATM::authenticator(const string& cardNum, const string& pin)
 {
+	if (getState() != ATM::State::Authorization) return 4;
+
 	if (bank.isCardValid(cardNum) == false)
 	{
 		setState(State::Idle);
@@ -40,29 +53,11 @@ int ATM::authenticator(const string& cardNum, const string& pin)
 	return 0; // everything is great
 }
 
-ATM::Session& ATM::getSession()
-{
-	assert(currentSession != nullptr);
-	return *currentSession;
-}
-
-inline void ATM::closeSession()
+void ATM::endSession()
 {
 	// return_the_card()
 	setState(State::Idle);
-	delete currentSession;
-}
-
-ATM::Session::~Session() {}
-
-inline const auto& ATM::Session::accInfo()
-{
-	return _atm.getAccInfo(_cardNum);
-}
-
-inline void ATM::Session::exit()
-{
-	_atm.closeSession();
+	//delete currentSession;
 }
 
 bool ATM::Session::withdraw(double amount)
@@ -95,11 +90,11 @@ int ATM::Session::transfer(const string& recipient, double amount)
 	return 0;
 }
 
-int ATM::Session::paymentMenu(/*ATM::Session::PayMenu act,*/ const string& id, double amount)
+int ATM::Session::paymentMenu(const string& recipient, const string& userID, double amount)
 {
 	if (_atm.bank.getCardBalance(_cardNum) < amount) return 2;
 	bool asrt = _atm.bank.removeMoney(_cardNum, -amount);
 	assert(!asrt);
-	// send a check to the owner
+	// send a check to the recipient
 	return 0;
 }

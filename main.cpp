@@ -66,12 +66,46 @@ int main() {
 		return crow::response(200, response.dump()); // Send the JSON response
 	});
 
+	// Route to handle exit
+	CROW_ROUTE(app, "/exit").methods("POST"_method)([&diyATM]() {
+		// Parse the JSON body
+
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		diyATM.endSession();
+
+		return crow::response(200);
+
+	});
+
+	// Route to handle acc_info
+	CROW_ROUTE(app, "/acc_info")([&diyATM](const crow::request& req) {
+		// Parse the JSON body
+		auto data = json::parse(req.body);
+		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
+
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		nlohmann::json accInfo = diyATM.getSession()->accInfo();
+
+		// Respond back to the client 
+		json response;
+		response["cardNumber"] = accInfo["cardNumber"];
+		response["balance"] = accInfo["balance"];
+
+		return crow::response(200, response.dump());
+
+	});
+
+	// Route to handle withdraw
 	CROW_ROUTE(app, "/withdraw").methods("POST"_method)([&diyATM](const crow::request& req) {
 		// Parse the JSON body
 		auto data = json::parse(req.body);
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 		
-		bool success = diyATM.getSession().withdraw(amount);
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		bool success = diyATM.getSession()->withdraw(amount);
 		// true if good, false if not enough money
 
 		// Respond back to the client 
@@ -90,7 +124,9 @@ int main() {
 		std::string card_number_to = data["cardNumber_to"];
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-		int success = diyATM.getSession().transfer(card_number_to, amount);
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		int success = diyATM.getSession()->transfer(card_number_to, amount);
 		// 0 - good; 1 - no card; 2 - no money
 		
 		// Respond back to the client 
@@ -108,7 +144,9 @@ int main() {
 		auto data = json::parse(req.body);
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-		diyATM.getSession().deposit(amount);
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		diyATM.getSession()->deposit(amount);
 		crow::response res(200);
 		return res;
 	});
@@ -118,10 +156,13 @@ int main() {
 	{
 		// Parse the JSON body
 		auto data = json::parse(req.body);
-		string address = data["address"];
+		string recipient = data["recipient"];
+		string userID = data["user_id"];
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
-		int res = diyATM.getSession().paymentMenu(address, amount);
+		if (diyATM.getSession() == nullptr)
+			return crow::response(400);
+		int res = diyATM.getSession()->paymentMenu(recipient, userID, amount);
 		// true if good, false if not enough money
 		
 		// Respond back to the client 

@@ -8,18 +8,19 @@ public:
 	enum class State;
 
 	ATM(Database& db);
-	~ATM();
+	~ATM() { delete currentSession; };
 
+	bool start();
 	int authenticator(const string& cardNum, const string& pin);
-	Session& getSession();
-	void closeSession();
+	Session* const getSession() { return currentSession; };
+	void endSession(); /*{ setState(ATM::State::Idle); delete currentSession; }*/
 
 private:
 	void setState(State state) { currentState = state; }
 	State getState() { return currentState; }
 
 	bool checkInDB(const string& cardNum) { return bank.isCardValid(cardNum);};
-	const auto& getAccInfo(const string& cardNum);
+	nlohmann::json getAccInfo(const string& cardNum);
 
 	int wrongPINtimes = 0;
 	Database& bank;
@@ -29,18 +30,15 @@ private:
 
 class ATM::Session
 {
-	friend int ATM::authenticator(const string& cardNum, const string& pin);
-	friend Session& ATM::getSession();
+	friend class ATM;
 
 public:
-	enum class PayMenu;
 	~Session();
-	void exit();
-	const auto& accInfo();
+	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
 	bool withdraw(double);
 	void deposit(double);
 	int transfer(const string&, double);
-	int paymentMenu(/*PayMenu,*/ const string&, double);
+	int paymentMenu(const string&, const string&, double);
 	
 private:
 	Session(ATM& myatm, const string& info) :_atm(myatm), _cardNum(info) {}
@@ -55,14 +53,4 @@ enum class ATM::State
 	Idle,
 	Authorization,
 	ActionMenu
-};
-
-enum class ATM::Session::PayMenu
-{
-	UtilityServices,
-	TravelCard,
-	Charity,
-	InfoTeleCom,
-	Steam,
-	Gambling
 };
