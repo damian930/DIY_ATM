@@ -3,10 +3,6 @@
 ATM::ATM(Database& db)
 	:currentState(State::Idle), bank(db) {}
 
-//ATM::~ATM()
-//{
-//	delete currentSession;
-//}
 
 nlohmann::json ATM::getAccInfo(const string& cardNum)
 {
@@ -57,7 +53,8 @@ void ATM::endSession()
 {
 	// return_the_card()
 	setState(State::Idle);
-	//delete currentSession;
+	delete currentSession;
+	currentSession = nullptr;
 }
 
 bool ATM::Session::withdraw(double amount)

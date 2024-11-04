@@ -13,7 +13,7 @@ public:
 	bool start();
 	int authenticator(const string& cardNum, const string& pin);
 	Session* const getSession() { return currentSession; };
-	void endSession(); /*{ setState(ATM::State::Idle); delete currentSession; }*/
+	void endSession();
 
 private:
 	void setState(State state) { currentState = state; }
@@ -33,7 +33,7 @@ class ATM::Session
 	friend class ATM;
 
 public:
-	~Session();
+	~Session() {};
 	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
 	bool withdraw(double);
 	void deposit(double);

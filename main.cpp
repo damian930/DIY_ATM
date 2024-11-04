@@ -48,6 +48,15 @@ int main() {
 		return crow::response(buffer.str());
 	});
 
+	// Route to handle start
+	CROW_ROUTE(app, "/start").methods("POST"_method)([&diyATM]() {
+		// Parse the JSON body
+
+		diyATM.start();
+		return crow::response(200);
+
+	});
+
 	// Route to handle form submissions
 	CROW_ROUTE(app, "/authorization").methods("POST"_method)([&diyATM](const crow::request& req) {
 		// Parse the JSON body
@@ -79,10 +88,7 @@ int main() {
 	});
 
 	// Route to handle acc_info
-	CROW_ROUTE(app, "/acc_info")([&diyATM](const crow::request& req) {
-		// Parse the JSON body
-		auto data = json::parse(req.body);
-		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
+	CROW_ROUTE(app, "/acc_info")([&diyATM]() {
 
 		if (diyATM.getSession() == nullptr)
 			return crow::response(400);
