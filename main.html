@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank</title>
+    <!-- fonts: -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-left: 5px;
+        }
+
+        /* navigation bar ================================================== */
+
+        nav {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%); 
+        }
+
+        .logo-icon {
+            margin-left: 20px;
+            width: 30px; 
+            height: auto; 
+            margin-right: 6px; 
+            vertical-align: middle; 
+        }
+
+        .logo {
+            font-size: 22px;
+            font-family: "Orbitron", sans-serif;
+            float: left;
+            padding: 0px 0;
+        }  
+        
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            gap: clamp(10px, 5vw, 180px);
+        }
+
+        .nav-links li {
+            text-align: center;
+        }
+
+        .nav-links a {
+            color: #9A7749;
+            text-decoration: none;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1em;
+            font-weight: medium;
+        }
+
+        /* main divs ======================================================= */
+
+        .content-container {
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 100px);
+            margin-top: 10px;
+            margin-bottom: 20px; 
+        }
+
+        .left-panel {
+            max-width: 40vw;
+            padding: 3vh 3vw;
+            flex: 1; 
+        }
+
+        /* left div ======================================================== */
+
+        .wallet-header {
+            font-size: clamp(16px, 2.5vw, 32px);
+            display: inline-block;
+            font-family: "Montserrat", sans-serif;
+            font-weight: bold;
+            border-bottom: 3px solid #333; 
+            padding-bottom: 4px; 
+        }
+
+        .wallet-div {
+            width: clamp(250px, 38vw, 400px);
+            height: clamp(135px, 22vw, 230px); 
+
+            padding-left: 2vw;
+            padding-top: 5px;
+            background-color: #1E1E1E;
+            border-radius: 12px;
+
+            display: flex;         
+            justify-content: space-between;
+            align-items: flex-start;        
+        }
+
+        .left-content {
+            display: flex;          
+            flex-direction: column;     
+        }
+
+        .credit-p {
+            font-size: clamp(12px, 1.7vw, 18px);
+            font-family: "Montserrat", sans-serif;
+            color: #FFFFFF;
+        }
+
+        .credit-balance-p {
+            font-size: clamp(11px, 1.5vw, 16px);
+            font-family: "Montserrat", sans-serif;
+            font-weight: bold;
+            color: #E1AE6A;
+            margin-bottom: 5px;
+        }
+
+        .credit-balance {
+            font-size: clamp(18px, 2.6vw, 28px);
+            font-family: "Montserrat", sans-serif;
+            font-weight: bold;
+            color: #E1AE6A;
+            margin-top: 0;
+        }
+
+        .right-p {
+            font-size: clamp(12px, 1.7vw, 18px);
+            font-family: "Montserrat", sans-serif;
+            font-weight: medium;
+            color: #FFFFFF;      
+            margin-right: 2vw;       
+        }
+
+        /* print message =================================================== */
+
+        .message-wrapper {
+            width: clamp(20px, 100%, 421px);
+            height: 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .result-message {
+            margin-top: 5%;
+            width: 90%;
+            height: clamp(50px, 12vw, 120px);
+
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+
+            background-color: #E1AE6A;
+            border: 2px solid black;
+        }
+
+        .message {
+            font-family: "Montserrat", sans-serif;
+            color: #158076;
+            font-weight: bold;
+            font-size: clamp(12px, 2vw, 20px);
+            margin: 5px;
+        }
+
+        /* right div (1) =================================================== */
+
+        .right-panel {
+            flex: 1; 
+            padding: 20px 10px;
+            margin-right: 40px;
+        }
+
+        .right-wrapper1 {
+            width: 100%;
+            height: 50vw;
+            max-height: 512px;
+            background-color: #F8F5F5;
+            border-radius: 20px;
+            max-width: 600px;
+            padding-left: 3vw;
+            padding-top: 15px;
+        }
+
+        .menu-h {
+            font-family: "Montserrat", sans-serif;
+            color: #000000;
+            font-weight: bold;
+            font-size: clamp(16px, 3vw, 26px);
+        }
+
+        .main-button-container {
+            display: grid; 
+            grid-template-columns: repeat(2, 45%); 
+            gap: 10px; 
+            height: 80%;
+        }
+
+        .main-button-container > div {
+            display: flex;              
+            flex-direction: column;     
+            justify-content: space-between;
+            align-items: center; 
+            cursor: pointer; 
+            padding: clamp(10px, 3vw, 40px) 0;
+        }
+
+        .main-button-container img {
+            width:  clamp(40px, 8vw, 65px);
+        }
+
+        .main-button-container > div:hover {
+            background-color: #dadada; 
+            border-radius: 5px;
+        }
+
+        .main-button-container p {
+            font-family: "Montserrat", sans-serif;
+            color: #000000;
+            font-weight: bold;
+        }
+
+        /* right div (2) =================================================== */
+
+        .right-wrapper2 {
+            width: 100%;
+            height: 600px;
+            background-color: #F8F5F5;
+            border-radius: 20px;
+            max-width: 600px;
+            padding-left: 3vw;
+            padding-top: 15px;
+        }
+
+        .payments-h {
+            font-family: "Montserrat", sans-serif;
+            color: #000000;
+            font-weight: bold;
+            font-size: clamp(14px, 2.5vw, 20px);
+        }
+
+        .payments-button-container {
+            display: grid; 
+            grid-template-columns: repeat(2, 45%); 
+            gap: 10px; 
+            height: 80%;
+        }
+
+        .payments-button-container > div {
+            display: flex;              
+            flex-direction: column;     
+            justify-content: space-between;
+            align-items: center; 
+            cursor: pointer; 
+            padding: 10px 0;
+        }
+
+        .payments-button-container img {
+            width:  clamp(40px, 8vw, 65px);
+        }
+
+        .payments-button-container > div:hover {
+            background-color: #dadada; 
+            border-radius: 5px;
+        }
+
+        .payments-button-container p {
+            font-family: "Montserrat", sans-serif;
+            color: #000000;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .main-h-wrapper {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .icon-0 {
+            width: 6vw;
+            height: 4vw;
+            max-width: 60px;
+            max-height: 40px;
+            margin-right: 5px;
+            cursor: pointer; 
+        }
+
+        .icon-0:hover {
+            opacity: 0.7;
+        }
+
+        /* input div ======================================================= */
+
+        .right-wrapper3 {
+            width: clamp(300px, 100%, 600px);
+            height: 500px;
+            background-color: #F8F5F5;
+            border-radius: 20px;
+            max-width: 600px;
+            min-width: 300px;
+            padding-left: 3vw;
+            padding-right: 3vw;
+            padding-top: 15px;
+        }
+
+        .input-container {
+            width: 100%;
+            height: 80%;
+            margin-top: 20%;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .right-wrapper3 h2 {
+            text-align: center;
+            border-bottom: 1px solid #9A7749; 
+            padding-bottom: 4px; 
+        }
+    
+        .right-wrapper3 input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 4px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    
+        .input-field.pin {
+            width: 80%;
+            letter-spacing: 2px;
+        }
+
+        .confirm-button {
+            margin-top: 20px;
+            font-weight: bold;
+            appearance: none;
+            background-color: black;
+            border: 2px solid #1A1A1A;
+            border-radius: 16px;
+            box-sizing: border-box;
+            color: #E1AE6A;
+            cursor: pointer;
+            display: inline-block;
+            font-family: "Montserrat", sans-serif;
+            font-size: 16px;
+            line-height: normal;
+            outline: none;
+            padding: 12px 40px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            will-change: transform;
+        }
+
+        .confirm-button:disabled {
+            pointer-events: none;
+        }
+
+        .confirm-button:hover {
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+        }
+
+        .confirm-button:active {
+            box-shadow: none;
+            transform: translateY(0);
+        }
+
+        .input-h {
+            font-family: "Montserrat", sans-serif;
+            color: #000000;
+            font-weight: bold;
+            font-size: clamp(14px, 2.5vw, 20px);
+        }
+
+    </style>
+    <script>
+        // change main menu
+        function changeMenu(n) {
+            const inputForm = document.getElementById("input-form");
+            if(n==-2) {
+                k = inputForm.getAttribute("n"); 
+                if (k == 1 || k == 2 || k == 3) {
+                    n = -1;
+                } else {
+                    n = 0;
+                }
+            }
+            const menu1 = document.getElementById("menu1");
+            const menu2 = document.getElementById("menu2");
+            if (n == 0) {
+                menu1.style.display = "none";
+                menu2.style.display = "block";
+            } else if (n==-1) {
+                menu1.style.display = "block";
+                menu2.style.display = "none";
+            } 
+            inputForm.style.display = "none";
+        }
+        
+        // print message
+        function printMessage(mes) {
+            wrapper = document.getElementById("message-wrapper");
+            message = document.getElementById("message");
+            message.textContent = mes;
+            wrapper.style.display = "flex";
+        }
+
+        function checkData(data, n) {
+            if (!data.enoughMoney) {
+                printMessage("operation failed: not enough money!");
+            } else if (!data.correctID && n != 1 && n != 2 && n != 3) {
+                printMessage("operation failed: id is incorrect!");
+            } else if (!data.cardNumber && n == 2) {
+                printMessage("operation failed: card number is incorrect!");
+            } else {
+                printMessage("operation success!");
+            }
+        }
+
+        // withdraw cash
+        async function withdraw(amount, n) {
+            try {
+                const response = await fetch('/withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        amount: amount,
+                    }),
+                });
+                if (!response.ok) {
+                    printMessage("network error")
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Success receiving answer:', data);
+                checkData(data, n);
+                showMoney();
+            } catch (error) {
+                printMessage("network error")
+                console.error('Error:', error);
+            }
+        }
+
+        // transfer to card operation
+        async function toCard(card_number, amount,  n) {
+            try {
+                const response = await fetch('/transfer_to_card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        cardNumber_to: card_number,
+                        amount: amount,
+                    }),
+                });
+                if (!response.ok) {
+                    printMessage("network error")
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Success receiving answer:', data);
+                checkData(data, n);
+                showMoney();
+            } catch (error) {
+                printMessage("network error")
+                console.error('Error:', error);
+            }
+        }
+
+        // top up operation
+        async function top_up(amount, n) {
+            try {
+                const response = await fetch('/top_up_the_card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        amount: amount,
+                    }),
+                });
+                if (!response.ok) {
+                    printMessage("network error")
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Success receiving answer:', data);
+                checkData(data, n);
+                showMoney();
+            } catch (error) {
+                printMessage("network error")
+                console.error('Error:', error);
+            }
+        }
+
+        // payment operation
+        async function doPayment(rec, id, amount, n) {
+            try {
+                const response = await fetch('/payments', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+
+               body: JSON.stringify({
+                   recipient: rec,
+                   user_id: id,
+                   amount: amount,
+                   }),
+               });
+               if (!response.ok) {
+                   printMessage("network error")
+                   throw new Error('Network response was not ok');
+               }
+               const data = await response.json();
+               console.log('Success receiving answer:', data);
+               checkData(data, n);
+               showMoney();
+            } catch (error) {
+               printMessage("network error")
+               console.error('Error:', error);
+           }
+        }        
+
+        // operation 
+        function doOperation() {
+            inputForm = document.getElementById("input-form")
+            n = inputForm.getAttribute("n");
+            recipient = document.getElementById("input-h")
+            rec = recipient.textContent;
+
+            if (n == 4 || n == 5 || n == 6 || n == 7 || n == 8 || n == 9) {
+                const id = document.getElementById('input1').value;
+                const amount = document.getElementById('input2').value;
+                doPayment(rec, id, amount, n);
+            } else if (n == 1) {
+                const amount = document.getElementById('input1').value;
+                withdraw(amount, n);
+            } else if (n == 2) {
+                const card_number = document.getElementById('input1').value;
+                const amount = document.getElementById('input2').value;
+                toCard(card_number, amount, n)
+            } else if (n == 3) {
+                const amount = document.getElementById('input1').value;
+                top_up(amount, n);
+            } else {
+                console.log("n is not suitable");
+            }
+
+        }
+
+        // show input menu by number n
+        function showInput(n) {
+            const menu1 = document.getElementById("menu1");
+            const menu2 = document.getElementById("menu2");
+            menu1.style.display = "none";
+            menu2.style.display = "none";
+
+            inputForm = document.getElementById("input-form")
+            header = document.getElementById("input-h")
+            label1 = document.getElementById("label-input1")
+            label2 = document.getElementById("label-input2")
+            input2 = document.getElementById("input2")
+
+            label2.style.display = "block";
+            input2.style.display = "block";
+            switch (n) {
+                case 1:
+                    header.textContent = "Withdraw cash";
+                    label1.textContent = "amount ₴";
+                    label2.style.display = "none";
+                    input2.style.display = "none";
+                    break;
+                case 2:
+                    header.textContent = "Transfer to card";
+                    label1.textContent = "Number of card";
+                    label2.textContent = "amount ₴"
+                    break;
+                case 3:
+                    header.textContent = "Top up the card";
+                    label1.textContent = "amount ₴";
+                    label2.style.display = "none";
+                    input2.style.display = "none";
+                    break;
+                case 4:
+                    header.textContent = "Utility services";
+                    label1.textContent = "number of service";
+                    label2.textContent = "amount ₴"
+                    break;
+                case 5:
+                    header.textContent = "Top up the travel card";
+                    label1.textContent = "Travel card number";
+                    label2.textContent = "amount ₴"
+                    break;
+                case 6:
+                    header.textContent = "Charity";
+                    label1.textContent = "charity address";
+                    label2.textContent = "amount ₴"
+                    break;
+                case 7:
+                    header.textContent = "Internet & Telecommunications";
+                    label1.textContent = "address of service";
+                    label2.textContent = "amount ₴"
+                    break;
+                case 8:
+                    header.textContent = "Top up your Steam account";
+                    label1.textContent = "steam acount address";
+                    label2.textContent = "amount ₴"
+                    break;    
+                case 9:
+                    header.textContent = "Gambling services";
+                    label1.textContent = "gambling acount address";
+                    label2.textContent = "amount ₴"
+                    break; 
+                default:
+                    break;
+            }
+            inputForm.setAttribute("n", n);
+            inputForm.style.display = "block";
+        }
+
+        async function showMoney() {
+            try {
+                const response = await fetch('/acc_info');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                const amount = data.balance;
+
+                document.getElementById('credit-balance').textContent = `₴ ${amount}`; 
+
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        }
+
+        // to extract amount of money when page is loaded
+        document.addEventListener("DOMContentLoaded", () => {
+            showMoney();
+        });
+
+        // redirect to started page
+        async function exitAndRedirect() {
+            try {
+                const response = await fetch('/exit', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                console.log('Successfully received exit response');
+
+                // Wait 1 second before redirecting
+                setTimeout(() => {
+                    window.location.href = '/'; 
+                }, 500);
+
+            } catch (error) {
+                console.error('Error with exit request:', error);
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <header class="top-header">
+        <div class="container">
+            <img src="/static/wallet.png" alt="Icon" class="logo-icon">
+            <h1 class="logo">DIYBank</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#" onclick="exitAndRedirect()">Exit</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="content-container">
+        <div class="left-panel">
+            <h1 class="wallet-header">WALLET</h1>
+            <div class="wallet-div">
+                <div class="left-content">
+                    <p class="credit-p">Credit Card</p>
+                    <p class="credit-balance-p">Total Balance</p>
+                    <p class="credit-balance" id="credit-balance">₴ 0</p>
+                </div>
+                <p class="right-p">DIYBank</p>
+            </div>
+            <div class="message-wrapper" style="display: none;" id = "message-wrapper">
+                <div class="result-message" id="result-message">
+                    <p class="message" id="message">pupupu</p>
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="right-wrapper1" id="menu1">
+                <h1 class="menu-h">MAIN</h1>
+                <div class="main-button-container">
+                    <div class="main-button1" id="main-button" onclick="showInput(1)">
+                        <img src="/static/money.png" alt="Icon" class="icon-1"> 
+                        <p>Withdraw cash</p>               
+                    </div>
+                    <div class="main-button2" id="main-button" onclick="showInput(2)">
+                        <img src="/static/phone.png" alt="Icon" class="icon-2">
+                        <p>Transfer to card</p>
+                    </div>
+                    <div class="main-button3" id="main-button" onclick="showInput(3)">
+                        <img src="/static/wallet2.png" alt="Icon" class="icon-3">
+                        <p>Top up the card</p>
+                    </div>
+                    <div class="main-button4" id="main-button" onclick="changeMenu(0)">
+                        <img src="/static/hands.png" alt="Icon" class="icon-4">
+                        <p>Payments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="right-wrapper2" style="display: none;" id="menu2">
+                <div class="main-h-wrapper">
+                    <img src="/static/arrow-back.png" alt="Icon" class="icon-0" onclick="changeMenu(-1)">
+                    <h1 class="payments-h">PAYMENTS</h1>
+                </div>
+                <div class="payments-button-container">
+                    <div class="main-button1" id="main-button" onclick="showInput(4)">
+                        <img src="/static/utility.png" alt="Icon" class="icon-5"> 
+                        <p>Utility services</p>               
+                    </div>
+                    <div class="main-button2" id="main-button" onclick="showInput(5)">
+                        <img src="/static/travel.png" alt="Icon" class="icon-6">
+                        <p>Top up<br>the travel card</p>
+                    </div>
+                    <div class="main-button3" id="main-button" onclick="showInput(6)">
+                        <img src="/static/charity.png" alt="Icon" class="icon-7">
+                        <p>Charity</p>
+                    </div>
+                    <div class="main-button4" id="main-button" onclick="showInput(7)">
+                        <img src="/static/internet.png" alt="Icon" class="icon-8">
+                        <p>Internet &<br>Telecommunications</p>
+                    </div>
+                    <div class="main-button5" id="main-button" onclick="showInput(8)">
+                        <img src="/static/game.png" alt="Icon" class="icon-9">
+                        <p>Top up your Steam<br>account</p>
+                    </div>
+                    <div class="main-button6" id="main-button" onclick="showInput(9)">
+                        <img src="/static/gambling.png" alt="Icon" class="icon-10">
+                        <p>Gambling services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="right-wrapper3" style="display: none;" id="input-form">
+                <div class="main-h-wrapper">
+                    <img src="/static/arrow-back.png" alt="Icon" class="icon-0" onclick="changeMenu(-2)">
+                    <h1 class="input-h" id="input-h"></h1>
+                </div>
+                <div class="input-container"> 
+                    <label for="input1" id="label-input1"></label>
+                    <input type="input1" id="input1" class="input1" pattern="[0-9]*" inputmode="numeric">
+                    
+                    <label for="input2" id="label-input2"></label>
+                    <input type="input2" id="input2" class="input2" pattern="[0-9]*" inputmode="numeric">
+                    <button class="confirm-button" onclick="doOperation()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>    

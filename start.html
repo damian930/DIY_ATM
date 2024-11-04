@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank</title>
+    <!-- fonts: -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-left: 5px;
+        }
+
+        /* navigation bar ================================================== */
+
+        nav {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%); 
+        }
+
+        .logo-icon {
+            margin-left: 20px;
+            width: 30px; 
+            height: auto; 
+            margin-right: 6px; 
+            vertical-align: middle; 
+        }
+
+        .logo {
+            font-size: 22px;
+            font-family: "Orbitron", sans-serif;
+            float: left;
+            padding: 0px 0;
+        }  
+        
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            gap: clamp(10px, 5vw, 180px);
+        }
+
+        .nav-links li {
+            text-align: center;
+        }
+
+        .nav-links a {
+            color: #9A7749;
+            text-decoration: none;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1em;
+            font-weight: medium;
+        }
+
+        /* main div ======================================================== */
+
+        .started-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center; 
+            height: 90vh; 
+            padding-left: 20px; 
+            margin-left: 15vw;
+            margin-right: 15vw;
+        }
+
+        .started-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            height: 40vh; 
+            margin-left: 30px;
+            width: 300px;
+            padding: 20px;
+        }
+
+        .started-button {
+            font-weight: bold;
+            align-self: flex-start;
+            appearance: none;
+            background-color: black;
+            border: 2px solid #1A1A1A;
+            border-radius: 16px;
+            box-sizing: border-box;
+            color: #E1AE6A;
+            cursor: pointer;
+            display: inline-block;
+            font-family: "Montserrat", sans-serif;
+            font-size: 16px;
+            line-height: normal;
+            outline: none;
+            padding: 12px 30px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            will-change: transform;
+        }
+
+        .started-button:disabled {
+            pointer-events: none;
+        }
+
+        .started-button:hover {
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+        }
+
+        .started-button:active {
+            box-shadow: none;
+            transform: translateY(0);
+        }
+
+        .banner-text {
+            align-self: flex-start;
+            font-size: 35px;
+        }
+
+        .rotated-image {
+            position: absolute;
+            right: 50px; 
+            top: 47%; 
+            width: 130px; 
+            z-index: 0; 
+        }
+
+        .percentage-image {
+            position: absolute;
+            top: 60%; 
+            width: 110px; 
+            right: -70px;
+            z-index: 0; 
+        }
+
+        .card-image {
+            position: absolute;
+            top: 35vh; 
+            width: 30vw; 
+            right: 0;
+            margin: 5%;
+            transform: translateY(-50%);
+            z-index: 0; 
+        }
+
+    </style>
+    <script>
+        function changePage() {
+            window.location.href = "http://localhost:8000/authorization";
+        }
+    </script>
+</head>
+<body>
+    <header class="top-header">
+        <div class="container">
+            <img src="/static/wallet.png" alt="Icon" class="logo-icon">
+            <h1 class="logo">DIYBank</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Contact us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="started-wrapper" id="started-wrapper">
+        <div class="started-container">
+            <h1 class="banner-text"> Let's start<br>something big<br>with us.</h1>
+            <img src="/static/arrow.png" alt="Decorative Image" class="rotated-image">
+            <img src="/static/percentage.png" alt="Percentage Image" class="percentage-image">
+            <button class="started-button" onclick="changePage()">Get started</button>
+        </div>
+        <img src="/static/card.png" alt="Card Image" class="card-image">
+    </div>
+    <div class="main-container" style="display: none;" id="main-container">
+        <h2 class="login-header">Authorization</h2>
+        <p class="login-text">login to your account</p>
+        <div class="form-container">
+            <div class="input-container"> 
+                <label for="card-number">Card number</label>
+                <input type="text" id="card-number" class="input-field" placeholder="---- ---- ----" maxlength="16" pattern="[0-9]*" inputmode="numeric">
+                
+                <label for="pin">PIN</label>
+                <input type="password" id="pin" class="input-field pin" placeholder="----" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+            </div>
+        </div> 
+        <p id="output-message" class="output-message" style="display: none;"></p>
+        <button class="submit-button" onclick="validateForm()">Log in</button> 
+    </div>
+</body>
+</html>
+
+
