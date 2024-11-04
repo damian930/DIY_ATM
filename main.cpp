@@ -29,7 +29,7 @@ int main() {
 
 		// check if can read the file
 		try {
-			html_content = load_html("index.html");
+			html_content = load_html("start.html");
 		}
 		catch (invalid_argument) {
 			return crow::response(500, "");
@@ -37,6 +37,36 @@ int main() {
 		return crow::response(200, html_content);
 		});
 
+	    // Route to serve Authorization HTML page
+    CROW_ROUTE(app, "/authorization")([&diyATM]() {
+        string html_content;
+
+        // check if can read the file
+        try {
+            html_content = load_html("authorization.html");
+        }
+        catch (invalid_argument) {
+            return crow::response(500, "");
+        }
+        return crow::response(200, html_content);
+        });
+
+	    // Route to serve Main HTML page
+    CROW_ROUTE(app, "/main")([]() {
+        string html_content;
+
+        // check if can read the file
+        try {
+            html_content = load_html("main.html");
+        }
+        catch (invalid_argument) {
+            return crow::response(500, "");
+        }
+		// start atm when loading main page 
+		diyATM.start();
+        return crow::response(200, html_content);
+        });
+	
 	// get images 
 	CROW_ROUTE(app, "/static/<string>")([](const crow::request& req, std::string filename) {
 		std::ifstream file("static/" + filename, std::ios::binary);
@@ -48,17 +78,8 @@ int main() {
 		return crow::response(buffer.str());
 		});
 
-	// Route to handle start
-	CROW_ROUTE(app, "/start").methods("POST"_method)([&diyATM]() {
-		// Parse the JSON body
-
-		diyATM.start();
-		return crow::response(200);
-
-		});
-
 	// Route to handle form submissions
-	CROW_ROUTE(app, "/authorization").methods("POST"_method)([&diyATM](const crow::request& req) {
+	CROW_ROUTE(app, "/authorization/send").methods("POST"_method)([&diyATM](const crow::request& req) {
 		// Parse the JSON body
 		auto data = json::parse(req.body);
 		std::string card_number = data["cardNumber"];
@@ -76,7 +97,7 @@ int main() {
 		});
 
 	// Route to handle exit
-	CROW_ROUTE(app, "/exit").methods("POST"_method)([&diyATM]() {
+	CROW_ROUTE(app, "/exit")([&diyATM]() {
 		// Parse the JSON body
 
 		if (diyATM.getSession() == nullptr)
@@ -84,7 +105,6 @@ int main() {
 		diyATM.endSession();
 
 		return crow::response(200);
-
 		});
 
 	// Route to handle acc_info
@@ -138,7 +158,7 @@ int main() {
 			// Respond back to the client 
 			json response;
 			response["cardNumber"] = success != 1;
-			response["EnoughMoney"] = success != 2;
+			response["enoughMoney"] = success != 2;
 
 			return crow::response(200, response.dump());
 		});
