@@ -27,7 +27,7 @@ void Database::createCardsTable()
     const char* sql = "CREATE TABLE IF NOT EXISTS Cards("
         "CardNumber TEXT NOT NULL PRIMARY KEY, "
         "PIN TEXT NOT NULL, "
-        "CurrentBalance REAL NOT NULL);";
+        "CurrentBalance INTEGER NOT NULL);";
     char* errorMessage = 0;
     int exit = sqlite3_exec(db, sql, 0, 0, &errorMessage);
     if (exit != SQLITE_OK)
@@ -38,8 +38,9 @@ void Database::createCardsTable()
     }
 }
 
-bool Database::insertCard(const string& cardNumber, const string& pin, double balance)
+bool Database::insertCard(const string& cardNumber, const string& pin, double dbalance)
 {
+    long long balance = long long(dbalance * 100);
     // Validate card number and PIN
     regex cardNumberPattern(R"(\d{16})"); // 16 digits
     regex pinPattern(R"(\d{4})");         // 4 digits
@@ -92,8 +93,9 @@ bool Database::insertCard(const string& cardNumber, const string& pin, double ba
     return true;
 }
 
-void Database::addMoney(const string& cardNumber, double amount)
+void Database::addMoney(const string& cardNumber, double damount)
 {
+    long long amount = long long(damount * 100);
     if (amount <= 0)
     {
         cerr << "Error: Amount must be positive." << endl;
@@ -112,8 +114,9 @@ void Database::addMoney(const string& cardNumber, double amount)
     }
 }
 
-void Database::removeMoney(const string& cardNumber, double amount)
+void Database::removeMoney(const string& cardNumber, double damount)
 {
+    long long amount = long long(damount * 100);
     if (amount <= 0)
     {
         cerr << "Error: Amount must be positive." << endl;
@@ -239,12 +242,11 @@ double Database::getCardBalance(const string& cardNumber)
         assert(false);
     }
 
-    nlohmann::json jsonData;
 
     if (sqlite3_step(stmt) == SQLITE_ROW)
     {
         double balance = sqlite3_column_double(stmt, 0);
-        return balance;
+        return double(balance)/100.0;
     }
     else
     {
@@ -252,7 +254,7 @@ double Database::getCardBalance(const string& cardNumber)
     }
 
     sqlite3_finalize(stmt);
-    return jsonData; // No record found
+    assert(false); // No record found
 }
 
 nlohmann::json Database::getCardDetails(const string& cardNumber)
@@ -272,11 +274,11 @@ nlohmann::json Database::getCardDetails(const string& cardNumber)
     {
         string cardNumber = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         string pin = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        double balance = sqlite3_column_double(stmt, 2);
+        long long balance = sqlite3_column_double(stmt, 2);
 
         jsonData["cardNumber"] = cardNumber;
         jsonData["pin"] = pin;
-        jsonData["balance"] = balance;
+        jsonData["balance"] = double(balance)/100.0;
     }
     else
     {

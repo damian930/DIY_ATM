@@ -18,15 +18,17 @@ string load_html(const string& path);
 int main() {
 	crow::SimpleApp app;
 
-	Database diyDB("diy_DB.db");
+	Database diyDB("diyDB2.db");
 	initialiseDatabase(diyDB);
 
 	ATM diyATM(diyDB);
 	/*cout << boolalpha;
 	cout << diyATM.start() << endl;
 	cout << diyATM.authenticator("1111111111111111", "1111") << endl;
-	cout << (diyATM.getSession() == nullptr) << endl;
-	cout << diyATM.getSession()->accInfo() << endl;*/
+	cout << diyATM.getSession()->accBalance() << endl;
+	diyATM.getSession()->deposit(333.3);
+	cout << diyATM.getSession()->accBalance() << endl;*/
+
 
 	/// First page the user sees
 	CROW_ROUTE(app, "/")([]() {
@@ -119,17 +121,14 @@ int main() {
 		if (diyATM.getSession() == nullptr)
 			return crow::response(400);
 
-		//nlohmann::json accInfo = diyATM.getSession()->accInfo();
-		double accInfo = diyATM.getSession()->accInfo();
+		nlohmann::json accInfo = diyATM.getSession()->accInfo();
+		//double accInfo = diyATM.getSession()->accInfo();
 
-		if (accInfo < 0)
-			return crow::response(400);
 		// Respond back to the client 
 		json response;
-		response["cardNumber"] = "8888777766665555";//accInfo["cardNumber"];
-		//response["balance"] = accInfo["balance"];
-		response["balance"] = accInfo;// ["balance"] ;
-		cout << response["balance"] << "-----------------------\n";
+		response["cardNumber"] = accInfo["cardNumber"];
+		response["balance"] = round(double(accInfo["balance"]) * 100)/100;
+		//response["balance"] = accInfo;// ["balance"] ;
 
 		return crow::response(200, response.dump());
 
@@ -184,7 +183,9 @@ int main() {
 
 			if (diyATM.getSession() == nullptr)
 				return crow::response(400);
+			cout << diyATM.getSession()->accBalance() << endl;
 			diyATM.getSession()->deposit(amount);
+			cout << diyATM.getSession()->accBalance() << endl;
 			crow::response res(200);
 			return res;
 		});
@@ -219,10 +220,10 @@ int main() {
 void initialiseDatabase(Database& database) {
 	database.createCardsTable();
 
-	database.insertCard("1111111111111111", "1111", 111.1);
-	database.insertCard("2222222222222222", "2222", 222.2);
-	database.insertCard("3333333333333333", "3333", 333.3);
-	if (database.insertCard("1111111111111111", "1111", 111.1))
+	database.insertCard("1111111111111111", "1111", 111*100);
+	database.insertCard("2222222222222222", "2222", 222*100);
+	database.insertCard("3333333333333333", "3333", 333*100);
+	if (database.insertCard("1111111111111111", "1111", 111*100))
 		assert(false);
 
 }

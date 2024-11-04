@@ -35,8 +35,8 @@ class ATM::Session
 
 public:
 	~Session() {};
-	//nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
-	double accInfo() { return _atm.bank.getCardBalance(_cardNum); };
+	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
+	double accBalance() { return _atm.bank.getCardBalance(_cardNum); };
 	bool withdraw(double);
 	void deposit(double);
 	int transfer(const string&, double);
