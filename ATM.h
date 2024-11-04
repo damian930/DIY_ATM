@@ -1,5 +1,6 @@
 #pragma once
 #include "DataBase.h"
+//#include <iostream>
 
 class ATM
 {
@@ -34,7 +35,8 @@ class ATM::Session
 
 public:
 	~Session() {};
-	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
+	//nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
+	double accInfo() { return _atm.bank.getCardBalance(_cardNum); };
 	bool withdraw(double);
 	void deposit(double);
 	int transfer(const string&, double);
@@ -44,7 +46,7 @@ private:
 	Session(ATM& myatm, const string& info) :_atm(myatm), _cardNum(info) {}
 
 	ATM& _atm;
-	const string& _cardNum;
+	const string _cardNum;
 };
 
 enum class ATM::State

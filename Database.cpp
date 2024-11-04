@@ -196,7 +196,7 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
     return false; // PIN does not match or query failed
 }
 
-double Database::getCardBalance(const string& cardNumber) {
+double Database::getCardBalance(const string & cardNumber) {
     string sql = "SELECT CurrentBalance FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 

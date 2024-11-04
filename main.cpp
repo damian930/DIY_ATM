@@ -18,10 +18,15 @@ string load_html(const string& path);
 int main() {
 	crow::SimpleApp app;
 
-	Database diyDB("diyDB.db");
+	Database diyDB("diy_DB.db");
 	initialiseDatabase(diyDB);
 
 	ATM diyATM(diyDB);
+	/*cout << boolalpha;
+	cout << diyATM.start() << endl;
+	cout << diyATM.authenticator("1111111111111111", "1111") << endl;
+	cout << (diyATM.getSession() == nullptr) << endl;
+	cout << diyATM.getSession()->accInfo() << endl;*/
 
 	/// First page the user sees
 	CROW_ROUTE(app, "/")([]() {
@@ -48,11 +53,14 @@ int main() {
         catch (invalid_argument) {
             return crow::response(500, "");
         }
+		// start atm when loading main page 
+		bool res = diyATM.start();
+		cout << res << "#############\n";
         return crow::response(200, html_content);
         });
 
 	    // Route to serve Main HTML page
-    CROW_ROUTE(app, "/main")([]() {
+    CROW_ROUTE(app, "/main")([&diyATM]() {
         string html_content;
 
         // check if can read the file
@@ -62,8 +70,6 @@ int main() {
         catch (invalid_argument) {
             return crow::response(500, "");
         }
-		// start atm when loading main page 
-		diyATM.start();
         return crow::response(200, html_content);
         });
 	
@@ -85,7 +91,7 @@ int main() {
 		std::string card_number = data["cardNumber"];
 		std::string card_pin = data["pin"];
 
-		int res = diyATM.authenticator(card_number, card_number);
+		int res = diyATM.authenticator(card_number, card_pin);
 
 		// Respond back to the client 
 		json response;
@@ -112,12 +118,18 @@ int main() {
 
 		if (diyATM.getSession() == nullptr)
 			return crow::response(400);
-		nlohmann::json accInfo = diyATM.getSession()->accInfo();
 
+		//nlohmann::json accInfo = diyATM.getSession()->accInfo();
+		double accInfo = diyATM.getSession()->accInfo();
+
+		if (accInfo < 0)
+			return crow::response(400);
 		// Respond back to the client 
 		json response;
-		response["cardNumber"] = accInfo["cardNumber"];
-		response["balance"] = accInfo["balance"];
+		response["cardNumber"] = "8888777766665555";//accInfo["cardNumber"];
+		//response["balance"] = accInfo["balance"];
+		response["balance"] = accInfo;// ["balance"] ;
+		cout << response["balance"] << "-----------------------\n";
 
 		return crow::response(200, response.dump());
 

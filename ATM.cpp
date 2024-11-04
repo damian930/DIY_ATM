@@ -29,7 +29,7 @@ int ATM::authenticator(const string& cardNum, const string& pin)
 		setState(State::Idle);
 		return 1; // no such a card
 	}
-	if (bank.isPinCorrect(cardNum, pin))
+	if (bank.isPinCorrect(cardNum, pin) == false)
 	{
 		++wrongPINtimes;
 		if (wrongPINtimes < 3)
@@ -61,7 +61,7 @@ bool ATM::Session::withdraw(double amount)
 {
 	if (_atm.bank.getCardBalance(_cardNum) < amount) return false;
 	bool asrt = _atm.bank.removeMoney(_cardNum, amount);
-	assert(!asrt);
+	assert(asrt);
 	// give_cash()
 	return true;
 }
@@ -90,8 +90,8 @@ int ATM::Session::transfer(const string& recipient, double amount)
 int ATM::Session::paymentMenu(const string& recipient, const string& userID, double amount)
 {
 	if (_atm.bank.getCardBalance(_cardNum) < amount) return 2;
-	bool asrt = _atm.bank.removeMoney(_cardNum, -amount);
-	assert(!asrt);
+	bool asrt = _atm.bank.removeMoney(_cardNum, amount);
+	assert(asrt);
 	// send a check to the recipient
 	return 0;
 }
