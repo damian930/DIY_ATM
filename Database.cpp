@@ -1,106 +1,123 @@
 #include "Database.h"
 #include <iostream>
 #include <regex>
-#include <nlohmann/json.hpp> 
+#include <nlohmann/json.hpp>
 using namespace std;
 
-Database::Database(const string& dbName) {
+Database::Database(const string& dbName)
+{
     int exit = sqlite3_open(dbName.c_str(), &db);
-    if (exit) {
+    if (exit)
+    {
         cerr << "Error opening DB: " << sqlite3_errmsg(db) << endl;
     }
-    else {
+    else
+    {
         cout << "Opened Database Successfully!" << endl;
     }
 }
 
-Database::~Database() {
+Database::~Database()
+{
     close();
 }
 
-bool Database::createCardsTable() {
+void Database::createCardsTable()
+{
     const char* sql = "CREATE TABLE IF NOT EXISTS Cards("
         "CardNumber TEXT NOT NULL PRIMARY KEY, "
         "PIN TEXT NOT NULL, "
         "CurrentBalance REAL NOT NULL);";
     char* errorMessage = 0;
     int exit = sqlite3_exec(db, sql, 0, 0, &errorMessage);
-    if (exit != SQLITE_OK) {
+    if (exit != SQLITE_OK)
+    {
         cerr << "Error creating table: " << errorMessage << endl;
         sqlite3_free(errorMessage);
-        return false;
+        assert(false);
     }
-    return true;
 }
 
-bool Database::insertCard(const string& cardNumber, const string& pin, double balance) {
+bool Database::insertCard(const string& cardNumber, const string& pin, double balance)
+{
     // Validate card number and PIN
     regex cardNumberPattern(R"(\d{16})"); // 16 digits
-    regex pinPattern(R"(\d{4})"); // 4 digits
+    regex pinPattern(R"(\d{4})");         // 4 digits
 
-    if (!regex_match(cardNumber, cardNumberPattern)) {
+    if (!regex_match(cardNumber, cardNumberPattern))
+    {
         cerr << "Error: Card number must be exactly 16 digits." << endl;
-        return false;
+        assert(false);
     }
-    if (!regex_match(pin, pinPattern)) {
+    if (!regex_match(pin, pinPattern))
+    {
         cerr << "Error: PIN must be exactly 4 digits." << endl;
-        return false;
+        assert(false);
     }
 
     // Check if the card already exists
     std::string sqlCheck = "SELECT COUNT(*) FROM Cards WHERE CardNumber = '" + cardNumber + "';";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
             int count = sqlite3_column_int(stmt, 0);
-            if (count > 0) {
+            if (count > 0)
+            {
                 cerr << "Error: Card already exists." << endl;
                 sqlite3_finalize(stmt);
                 return false;
             }
         }
     }
-    else {
+    else
+    {
         cerr << "Error checking for existing card: " << sqlite3_errmsg(db) << endl;
         sqlite3_finalize(stmt);
-        return false;
+        assert(false);
     }
     sqlite3_finalize(stmt);
 
     string sql = "INSERT INTO Cards (CardNumber, PIN, CurrentBalance) VALUES ('" + cardNumber + "', '" + pin + "', " + std::to_string(balance) + ");";
     char* errorMessage = nullptr;
     int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
-    if (exit != SQLITE_OK) {
+    if (exit != SQLITE_OK)
+    {
         cerr << "Error inserting card: " << errorMessage << endl;
         sqlite3_free(errorMessage);
-        return false;
+        assert(false);
     }
     return true;
 }
 
-bool Database::addMoney(const string& cardNumber, double amount) {
-    if (amount <= 0) {
+void Database::addMoney(const string& cardNumber, double amount)
+{
+    if (amount <= 0)
+    {
         cerr << "Error: Amount must be positive." << endl;
-        return false;
+        assert(false);
     }
 
     // Update the balance by adding the amount
     string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance + " + to_string(amount) + " WHERE CardNumber = " + cardNumber + ";";
     char* errorMessage = nullptr;
     int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
-    if (exit != SQLITE_OK) {
+    if (exit != SQLITE_OK)
+    {
         cerr << "Error adding money: " << errorMessage << endl;
         sqlite3_free(errorMessage);
-        return false;
+        assert(false);
     }
-    return true;
 }
 
-bool Database::removeMoney(const string& cardNumber, double amount) {
-    if (amount <= 0) {
+void Database::removeMoney(const string& cardNumber, double amount)
+{
+    if (amount <= 0)
+    {
         cerr << "Error: Amount must be positive." << endl;
-        return false;
+        assert(false);
     }
 
     // Check the current balance first
@@ -108,44 +125,51 @@ bool Database::removeMoney(const string& cardNumber, double amount) {
     string sqlCheck = "SELECT CurrentBalance FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
             currentBalance = sqlite3_column_double(stmt, 0);
         }
-        else {
+        else
+        {
             cerr << "Error: Card not found." << endl;
             sqlite3_finalize(stmt);
-            return false;
+            assert(false);
         }
     }
-    else {
+    else
+    {
         cerr << "Error checking balance: " << sqlite3_errmsg(db) << endl;
         sqlite3_finalize(stmt);
-        return false;
+        assert(false);
     }
     sqlite3_finalize(stmt);
 
-    if (currentBalance < amount) {
+    if (currentBalance < amount)
+    {
         cerr << "Error: Insufficient funds." << endl;
-        return false;
+        assert(false);
     }
 
     // Update the balance by subtracting the amount
-    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance - " + to_string(amount) + " WHERE CardCunuber = " + cardNumber + ";";
+    string sql = "UPDATE Cards SET CurrentBalance = CurrentBalance - " + to_string(amount) + " WHERE CardNumber = " + cardNumber + ";";
     char* errorMessage = nullptr;
     int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
-    if (exit != SQLITE_OK) {
+    if (exit != SQLITE_OK)
+    {
         cerr << "Error withdrawing money: " << errorMessage << endl;
         sqlite3_free(errorMessage);
-        return false;
+        assert(false);
     }
-    return true;
 }
 
-bool Database::isCardValid(const string& cardNumber) {
+bool Database::isCardValid(const string& cardNumber)
+{
     // Validate the card number format
     regex cardNumberPattern(R"(\d{16})"); // 16 digits
-    if (!regex_match(cardNumber, cardNumberPattern)) {
+    if (!regex_match(cardNumber, cardNumberPattern))
+    {
         cerr << "Error: Card number must be exactly 16 digits." << endl;
         return false;
     }
@@ -154,14 +178,17 @@ bool Database::isCardValid(const string& cardNumber) {
     string sql = "SELECT COUNT(*) FROM Cards WHERE CardNumber = '" + cardNumber + "';";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
             int count = sqlite3_column_int(stmt, 0);
             sqlite3_finalize(stmt);
             return count > 0; // Returns true if the card exists
         }
     }
-    else {
+    else
+    {
         cerr << "Error checking card validity: " << sqlite3_errmsg(db) << endl;
     }
 
@@ -169,10 +196,12 @@ bool Database::isCardValid(const string& cardNumber) {
     return false; // Card does not exist or query failed
 }
 
-bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
+bool Database::isPinCorrect(const string& cardNumber, const string& pin)
+{
     // Validate the PIN format
     regex pinPattern(R"(\d{4})"); // 4 digits
-    if (!regex_match(pin, pinPattern)) {
+    if (!regex_match(pin, pinPattern))
+    {
         cerr << "Error: PIN must be exactly 4 digits." << endl;
         return false;
     }
@@ -181,14 +210,17 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
     string sql = "SELECT COUNT(*) FROM Cards WHERE CardNumber = '" + cardNumber + "' AND PIN = '" + pin + "';";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
             int count = sqlite3_column_int(stmt, 0);
             sqlite3_finalize(stmt);
             return count > 0; // Returns true if the PIN is correct
         }
     }
-    else {
+    else
+    {
         cerr << "Error checking PIN: " << sqlite3_errmsg(db) << endl;
     }
 
@@ -196,22 +228,26 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin) {
     return false; // PIN does not match or query failed
 }
 
-double Database::getCardBalance(const string & cardNumber) {
+double Database::getCardBalance(const string& cardNumber)
+{
     string sql = "SELECT CurrentBalance FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
         cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
-        return false;
+        assert(false);
     }
 
     nlohmann::json jsonData;
 
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_step(stmt) == SQLITE_ROW)
+    {
         double balance = sqlite3_column_double(stmt, 0);
         return balance;
     }
-    else {
+    else
+    {
         assert(false);
     }
 
@@ -219,18 +255,21 @@ double Database::getCardBalance(const string & cardNumber) {
     return jsonData; // No record found
 }
 
-nlohmann::json Database::getCardDetails(const string& cardNumber) {
+nlohmann::json Database::getCardDetails(const string& cardNumber)
+{
     string sql = "SELECT * FROM Cards WHERE CardNumber = " + cardNumber + ";";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
         cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
-        return false;
+        assert(false);
     }
 
     nlohmann::json jsonData;
 
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
+    if (sqlite3_step(stmt) == SQLITE_ROW)
+    {
         string cardNumber = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         string pin = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         double balance = sqlite3_column_double(stmt, 2);
@@ -239,7 +278,8 @@ nlohmann::json Database::getCardDetails(const string& cardNumber) {
         jsonData["pin"] = pin;
         jsonData["balance"] = balance;
     }
-    else {
+    else
+    {
         assert(false);
     }
 
@@ -247,10 +287,7 @@ nlohmann::json Database::getCardDetails(const string& cardNumber) {
     return jsonData; // No record found
 }
 
-void Database::close() {
+void Database::close()
+{
     sqlite3_close(db);
 }
-
-
-
-

@@ -60,8 +60,7 @@ void ATM::endSession()
 bool ATM::Session::withdraw(double amount)
 {
 	if (_atm.bank.getCardBalance(_cardNum) < amount) return false;
-	bool asrt = _atm.bank.removeMoney(_cardNum, amount);
-	assert(asrt);
+	_atm.bank.removeMoney(_cardNum, amount);
 	// give_cash()
 	return true;
 }
@@ -69,8 +68,7 @@ bool ATM::Session::withdraw(double amount)
 void ATM::Session::deposit(double amount)
 {
 	// should have read amount from money-reader but we don't have it
-	bool asrt = _atm.bank.addMoney(_cardNum, amount);
-	assert(asrt);
+	_atm.bank.addMoney(_cardNum, amount);
 }
 
 int ATM::Session::transfer(const string& recipient, double amount)
@@ -80,9 +78,8 @@ int ATM::Session::transfer(const string& recipient, double amount)
 	if (_atm.bank.getCardBalance(_cardNum) < amount)
 		return 2; // not enough money
 
-	bool a = _atm.bank.removeMoney(_cardNum, amount);
-	bool b = _atm.bank.addMoney(recipient, amount);
-	assert(a && b);
+	_atm.bank.removeMoney(_cardNum, amount);
+	_atm.bank.addMoney(recipient, amount);
 
 	return 0;
 }
@@ -90,8 +87,7 @@ int ATM::Session::transfer(const string& recipient, double amount)
 int ATM::Session::paymentMenu(const string& recipient, const string& userID, double amount)
 {
 	if (_atm.bank.getCardBalance(_cardNum) < amount) return 2;
-	bool asrt = _atm.bank.removeMoney(_cardNum, amount);
-	assert(asrt);
+	_atm.bank.removeMoney(_cardNum, amount);
 	// send a check to the recipient
 	return 0;
 }

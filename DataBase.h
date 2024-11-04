@@ -8,12 +8,12 @@ class Database {
 public:
     Database(const string& dbName);
     ~Database();
-    bool createCardsTable();
+    void createCardsTable();
     bool insertCard(const string& cardNumber, const string& pin, double balance);
-    nlohmann::json getCardDetails(const string& cardNumber);
     double getCardBalance(const string& cardNumber);
-    bool addMoney(const string& cardNumber, double amount);
-    bool removeMoney(const string& cardNumber, double amount);
+    nlohmann::json getCardDetails(const string& cardNumber);
+    void addMoney(const string& cardNumber, double amount);
+    void removeMoney(const string& cardNumber, double amount);
     bool isCardValid(const string& cardNumber);
     bool isPinCorrect(const string& cardNumber, const string& pin);
     void close();
