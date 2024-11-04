@@ -186,8 +186,10 @@ int main() {
 			cout << diyATM.getSession()->accBalance() << endl;
 			diyATM.getSession()->deposit(amount);
 			cout << diyATM.getSession()->accBalance() << endl;
-			crow::response res(200);
-			return res;
+
+			json response;
+			response["enoughMoney"] = true;
+			return crow::response(200, response.dump());
 		});
 
 	// Route to handle payments
@@ -220,10 +222,10 @@ int main() {
 void initialiseDatabase(Database& database) {
 	database.createCardsTable();
 
-	database.insertCard("1111111111111111", "1111", 111*100);
-	database.insertCard("2222222222222222", "2222", 222*100);
-	database.insertCard("3333333333333333", "3333", 333*100);
-	if (database.insertCard("1111111111111111", "1111", 111*100))
+	database.insertCard("1111111111111111", "1111", 11100); // coins, like 1/100 of hrn
+	database.insertCard("2222222222222222", "2222", 22200);
+	database.insertCard("3333333333333333", "3333", 33300);
+	if (database.insertCard("1111111111111111", "1111", 11100))
 		assert(false);
 
 }
