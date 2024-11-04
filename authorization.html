@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank</title>
+    <!-- fonts: -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-left: 5px;
+        }
+
+        /* navigation bar ================================================== */
+
+        nav {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%); 
+        }
+
+        .logo-icon {
+            margin-left: 20px;
+            width: 30px; 
+            height: auto; 
+            margin-right: 6px; 
+            vertical-align: middle; 
+        }
+
+        .logo {
+            font-size: 22px;
+            font-family: "Orbitron", sans-serif;
+            float: left;
+            padding: 0px 0;
+        }  
+        
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            gap: clamp(10px, 5vw, 180px);
+        }
+
+        .nav-links li {
+            text-align: center;
+        }
+
+        .nav-links a {
+            color: #9A7749;
+            text-decoration: none;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1em;
+            font-weight: medium;
+        }
+
+        /* main div ======================================================== */
+
+        .main-container {
+            position: absolute;
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            height: 450px; 
+            width: clamp(200px, 80vw, 700px);
+            padding: 20px; 
+        }
+
+        .form-container {
+            height: 60%;
+            background-color: #F8F5F5;
+            border-radius: 20px;
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 20px; 
+            flex-direction: column;
+        }
+
+        .login-header {
+            margin-bottom: 4px;
+            font-size: 22px;
+            font-family: "Montserrat", sans-serif;
+            font-weight: bold;
+        }
+
+        .login-text {
+            margin: 0;
+            font-size: 13px;
+            color: #A7A7A7;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .input-container {
+            width: 60%;
+            margin-left: 10%;
+        }
+
+
+        .input-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    
+        .input-field {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 4px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    
+        .input-field.pin {
+            width: 80%;
+            letter-spacing: 2px;
+        }
+
+        .submit-button {
+            margin-top: 20px;
+            font-weight: bold;
+            appearance: none;
+            background-color: black;
+            border: 2px solid #1A1A1A;
+            border-radius: 16px;
+            box-sizing: border-box;
+            color: #E1AE6A;
+            cursor: pointer;
+            display: inline-block;
+            font-family: "Montserrat", sans-serif;
+            font-size: 16px;
+            line-height: normal;
+            outline: none;
+            padding: 12px 40px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            will-change: transform;
+        }
+
+        .submit-button:disabled {
+            pointer-events: none;
+        }
+
+        .submit-button:hover {
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+        }
+
+        .submit-button:active {
+            box-shadow: none;
+            transform: translateY(0);
+        }
+
+        .output-message {
+            margin-top: 10px; 
+            display: none; 
+        }
+
+        .banner-text {
+            font-size: 34px;
+            font-family: "Montserrat", sans-serif;
+        }
+
+    </style>
+    <script>
+        async function sendToServer(cardNumber, pin, outputMessage) {
+           
+           try {
+               const response = await fetch('/authorization/send', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+
+               body: JSON.stringify({
+                   cardNumber: cardNumber,
+                   pin: pin,
+                   }),
+               });
+
+               if (!response.ok) {
+                   throw new Error('Network response was not ok');
+               }
+
+               const data = await response.json();
+               console.log('Success receiving answer:', data);
+
+               if (!data.cardNumber) {
+                   outputMessage.innerText = "invalid card number"
+               } else if (!data.pin) {
+                   outputMessage.innerText = "invalid card pin"
+               } else if (!data.notBlocked) {
+                   outputMessage.innerText = "user is blocked"
+               } else {
+                   outputMessage.style.color = "green";
+                   outputMessage.innerText = "success!"
+                   setTimeout(() => {
+                       window.location.href = "/main"; // Redirect to the main page
+                   }, 1000);
+               }
+           } catch (error) {
+               console.error('Error:', error);
+           }
+       }
+
+        function validateForm() {
+            const cardNumber = document.getElementById('card-number').value;
+            const pin = document.getElementById('pin').value;
+            const outputMessage = document.getElementById('output-message');
+            outputMessage.innerText = "";
+
+            const isCardNumberValid = /^\d{16}$/.test(cardNumber); // Check for 16 digits
+            const isPinValid = /^\d{4}$/.test(pin); // Check for 4 digits
+
+            outputMessage.style.display = 'block';
+            outputMessage.style.color = "red"; 
+
+            if (!isCardNumberValid) {
+                outputMessage.innerText = 'Card number must be exactly 16 digits. ';
+            } else if (!isPinValid) {
+                outputMessage.innerText = 'PIN must be exactly 4 digits. ';
+            }
+            else {
+                sendToServer(cardNumber, pin, outputMessage);
+            }
+        }
+    </script>
+</head>
+<body>
+    <header class="top-header">
+        <div class="container">
+            <img src="/static/wallet.png" alt="Icon" class="logo-icon">
+            <h1 class="logo">DIYBank</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Contact us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="main-container" id="main-container">
+        <h2 class="login-header">Authorization</h2>
+        <p class="login-text">login to your account</p>
+        <div class="form-container">
+            <div class="input-container"> 
+                <label for="card-number">Card number</label>
+                <input type="text" id="card-number" class="input-field" placeholder="---- ---- ---- ----" maxlength="16" pattern="[0-9]*" inputmode="numeric">
+                
+                <label for="pin">PIN</label>
+                <input type="password" id="pin" class="input-field pin" placeholder="----" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+            </div>
+        </div> 
+        <p id="output-message" class="output-message" style="display: none;"></p>
+        <button class="submit-button" onclick="validateForm()">Log in</button> 
+    </div>
+</body>
+</html>
