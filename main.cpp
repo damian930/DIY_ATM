@@ -7,6 +7,7 @@
 #include <cassert>
 #include "DataBase.h"
 #include "ATM.h"
+#include "Test_ATM.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -14,6 +15,8 @@ using json = nlohmann::json;
 void initialiseDatabase(Database& database);
 string load_html(const string& path);
 
+// TODO: till Tfin fix some edge cases that call assert(false) from the inside of data base. 
+//		 handle it on both ATM API level and the front end
 
 int main() {
 	crow::SimpleApp app;
@@ -21,15 +24,14 @@ int main() {
 	Database diyDB("diyDB2.db");
 	initialiseDatabase(diyDB);
 
+	// testing right before letting someone use it
+	Test_ATM test(diyDB);
+	test.test_all();
+	//============================================
+
 	ATM diyATM(diyDB);
-	/*cout << boolalpha;
-	cout << diyATM.start() << endl;
-	cout << diyATM.authenticator("1111111111111111", "1111") << endl;
-	cout << diyATM.getSession()->accBalance() << endl;
-	diyATM.getSession()->deposit(333.3);
-	cout << diyATM.getSession()->accBalance() << endl;*/
 
-
+	
 	/// First page the user sees
 	CROW_ROUTE(app, "/")([]() {
 		string html_content;
@@ -220,14 +222,15 @@ int main() {
 }
 
 void initialiseDatabase(Database& database) {
+	cout << "\n===========================================================" << endl;
+
 	database.createCardsTable();
 
 	database.insertCard("1111111111111111", "1111", 11100); // coins, like 1/100 of hrn
 	database.insertCard("2222222222222222", "2222", 22200);
 	database.insertCard("3333333333333333", "3333", 33300);
-	if (database.insertCard("1111111111111111", "1111", 11100))
-		assert(false);
 
+	cout << "===========================================================\n" << endl;
 }
 
 string load_html(const string& path) {

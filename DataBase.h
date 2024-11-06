@@ -10,6 +10,7 @@ public:
     ~Database();
     void createCardsTable();
     bool insertCard(const string& cardNumber, const string& pin, double balance);
+    bool removeCard(const string& cardNumber);
     double getCardBalance(const string& cardNumber);
     nlohmann::json getCardDetails(const string& cardNumber);
     void addMoney(const string& cardNumber, double amount);

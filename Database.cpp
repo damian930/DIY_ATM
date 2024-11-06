@@ -93,6 +93,52 @@ bool Database::insertCard(const string& cardNumber, const string& pin, double db
     return true;
 }
 
+bool Database::removeCard(const string& cardNumber) {
+    // Validate card number
+    regex cardNumberPattern(R"(\d{16})"); // 16 digits
+
+    if (!regex_match(cardNumber, cardNumberPattern))
+    {
+        cerr << "Error: Card number must be exactly 16 digits." << endl;
+        assert(false);
+    }
+    
+    // Check if the card already exists
+    std::string sqlCheck = "SELECT COUNT(*) FROM Cards WHERE CardNumber = '" + cardNumber + "';";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sqlCheck.c_str(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int count = sqlite3_column_int(stmt, 0);
+            if (count == 0)
+            {
+                cerr << "Error: Card doesnt exist." << endl;
+                sqlite3_finalize(stmt);
+                return false;
+            }
+        }
+    }
+    else
+    {
+        cerr << "Error checking for existing card: " << sqlite3_errmsg(db) << endl;
+        sqlite3_finalize(stmt);
+        assert(false);
+    }
+    sqlite3_finalize(stmt);
+    string sql = "DELETE FROM Cards WHERE CardNumber = '" + cardNumber + "';";
+    char* errorMessage = nullptr;
+    int exit = sqlite3_exec(db, sql.c_str(), 0, 0, &errorMessage);
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error deleting card: " << errorMessage << endl;
+        sqlite3_free(errorMessage);
+        assert(false);
+    }
+    return true;
+}
+
 void Database::addMoney(const string& cardNumber, double damount)
 {
     long long amount = long long(damount * 100);
