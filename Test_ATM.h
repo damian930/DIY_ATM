@@ -31,7 +31,7 @@ public:
 	// Testing correct ATM usage 
 
 	void test_Booting_up_AND_autorising_AND_depositing_money() {
-		// boot up first, then initialise with 1 try, then add money
+		// boot up first, then initialize with 1 try, then add money
 		double money_to_deposit = 1000.5;
 
 		_atm.start();
@@ -47,7 +47,7 @@ public:
 	}
 
 	void test_Booting_up_AND_autorising_AND_withdrawing_cash() {
-		// boot up first, then initialise with 1 try, then withdraw money
+		// boot up first, then initialize with 1 try, then withdraw money
 		double money_to_withdraw = 1000.5;
 
 		_atm.start();
@@ -63,7 +63,7 @@ public:
 	}
 
 	void test_Booting_up_AND_autorising_AND_transfering_money() {
-		// boot up first, then initialise with 1 try, then transfer money
+		// boot up first, then initialize with 1 try, then transfer money
 		double money_to_transfer = 100;
 
 		_atm.start();
@@ -93,7 +93,7 @@ public:
 	}
 
 	void test_Booting_up_AND_autorising_AND_sending_money_via_extra_payment_menu() {
-		// boot up first, then initialise with 1 try,then send money via extra payment menu
+		// boot up first, then initialize with 1 try,then send money via extra payment menu
 		int money_to_send = 500;
 
 		_atm.start();
@@ -101,10 +101,10 @@ public:
 
 		double initiali_balance = _atm.getSession()->accBalance();
 		_atm.getSession()->deposit(money_to_send);
-		_atm.getSession()->paymentMenu("placeholder", "placeholder", money_to_send);
+		_atm.getSession()->paymentMenu("placeholder", "username", money_to_send);
 		double new_balance = _atm.getSession()->accBalance();
 
-		assert(initiali_balance ==  new_balance);
+		assert(initiali_balance == new_balance);
 
 		_atm.endSession();
 	}
@@ -117,6 +117,8 @@ public:
 	}
 
 	void test_Authorising_with_invalid_data() {
+		_atm.start();
+		assert(_atm.authenticator("0000000000000000", "1111") == 1); // wrong card num
 		_atm.start();
 		assert(_atm.authenticator("1111111111111111", "2222") == 2); // 1st time wrong pin
 		assert(_atm.authenticator("1111111111111111", "2222") == 2); // 2nd time wrong pin
@@ -135,7 +137,7 @@ public:
 	}
 
 	void test_Deposit_edge_cases() {
-		// function doesnt have eny edge cases
+		// function doesn't have any edge cases
 	}
 
 	void test_Transfer_edge_cases() {
