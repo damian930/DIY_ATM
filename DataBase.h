@@ -23,3 +23,5 @@ private:
     sqlite3* db;
 };
 
+void initialiseDatabase(Database& database);
+

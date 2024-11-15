@@ -339,3 +339,16 @@ void Database::close()
 {
     sqlite3_close(db);
 }
+
+// test function
+void initialiseDatabase(Database& database) {
+    cout << "\n===========================================================" << endl;
+
+    database.createCardsTable();
+
+    database.insertCard("1111111111111111", "1111", 11100); // coins, like 1/100 of hrn
+    database.insertCard("2222222222222222", "2222", 22200);
+    database.insertCard("3333333333333333", "3333", 33300);
+
+    cout << "===========================================================\n" << endl;
+}

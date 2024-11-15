@@ -1,20 +1,20 @@
 #pragma once
 #include "DataBase.h"
-//#include <iostream>
 
 class ATM
 {
 public:
 	class Session;
 	enum class State;
+	enum class Error;
 
 	ATM(Database& db);
 	~ATM() { delete currentSession; };
 
-	bool start();
-	int authenticator(const string& cardNum, const string& pin);
+	ATM::Error start();
+	ATM::Error authenticator(const string& cardNum, const string& pin);
 	Session* const getSession() { return currentSession; };
-	void endSession();
+	ATM::Error endSession();
 
 private:
 	void setState(State state) { currentState = state; }
@@ -22,6 +22,7 @@ private:
 
 	bool checkInDB(const string& cardNum) { return bank.isCardValid(cardNum);};
 	nlohmann::json getAccInfo(const string& cardNum);
+	double getAccBalance(const string& cardNum);
 
 	int wrongPINtimes = 0;
 	Database& bank;
@@ -36,11 +37,11 @@ class ATM::Session
 public:
 	~Session() {};
 	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
-	double accBalance() { return _atm.bank.getCardBalance(_cardNum); };
-	bool withdraw(double);
-	void deposit(double);
-	int transfer(const string&, double);
-	int paymentMenu(const string&, const string&, double);
+	double accBalance() { return _atm.getAccBalance(_cardNum); };
+	ATM::Error withdraw(double);
+	ATM::Error deposit(double);
+	ATM::Error transfer(const string&, double);
+	ATM::Error paymentMenu(const string&, const string&, double);
 	
 private:
 	Session(ATM& myatm, const string& info) :_atm(myatm), _cardNum(info) {}
@@ -55,4 +56,15 @@ enum class ATM::State
 	Idle,
 	Authorization,
 	ActionMenu
+};
+
+enum class ATM::Error
+{
+	EverythingIsFine = 0,
+	WrongATMState,
+	WrongCardNum,
+	WrongPIN,
+	CardWasBlocked,
+	BadMoneyValue,
+	NotEnoughMoney
 };
