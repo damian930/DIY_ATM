@@ -346,9 +346,12 @@ void initialiseDatabase(Database& database) {
 
     database.createCardsTable();
 
-    database.insertCard("1111111111111111", "1111", 11100); // coins, like 1/100 of hrn
-    database.insertCard("2222222222222222", "2222", 22200);
-    database.insertCard("3333333333333333", "3333", 33300);
+    database.insertCard("1111111111111111", "1111", 111);
+    database.insertCard("2222222222222222", "2222", 222);
+    database.insertCard("3333333333333333", "3333", 333);
+    database.insertCard("1111222233334444", "1234", -20000);
+    database.insertCard("4444444444444444", "4444", 0.99);
+
 
     cout << "===========================================================\n" << endl;
 }
