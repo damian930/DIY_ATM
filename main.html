@@ -294,9 +294,7 @@
         }
 
         .icon-0 {
-            width: 6vw;
             height: 4vw;
-            max-width: 60px;
             max-height: 40px;
             margin-right: 5px;
             cursor: pointer; 
@@ -410,6 +408,8 @@
 
         // change main menu
         function changeMenu(n) {
+            document.getElementById('input2').value = "";
+            document.getElementById('input1').value = "";
             const inputForm = document.getElementById("input-form");
             if(n==-2) {
                 k = inputForm.getAttribute("n"); 
