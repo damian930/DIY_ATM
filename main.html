@@ -126,6 +126,13 @@
             margin-bottom: 5px;
         }
 
+        .card-number {
+            font-size: clamp(15px, 2.2vw, 22px);
+            font-family: "Montserrat", sans-serif;
+            color: #FFFFFF;
+            margin-bottom: 12px;
+        }
+
         .credit-balance {
             font-size: clamp(18px, 2.6vw, 28px);
             font-family: "Montserrat", sans-serif;
@@ -157,19 +164,17 @@
             margin-top: 5%;
             width: 90%;
             height: clamp(50px, 12vw, 120px);
-
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-
+            justify-content: center;
+            align-items: center;
             background-color: #E1AE6A;
             border: 2px solid black;
         }
 
         .message {
+            text-align: center;
             font-family: "Montserrat", sans-serif;
-            color: #158076;
+            color: #000000;
             font-weight: bold;
             font-size: clamp(12px, 2vw, 20px);
             margin: 5px;
@@ -402,6 +407,7 @@
 
     </style>
     <script>
+
         // change main menu
         function changeMenu(n) {
             const inputForm = document.getElementById("input-form");
@@ -554,7 +560,22 @@
                printMessage("network error")
                console.error('Error:', error);
            }
-        }        
+        }       
+
+        function chachAmount(amount) {
+            amountChecked = amount.match(/^\d*([.]\d{0,2})?$/);
+            if (amountChecked) {
+                if (parseFloat(amount) > 10000) {
+                    printMessage("please, enter max 10000 ₴ value!")
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                printMessage("please, use positive value with max two digits after point!")
+                return false;
+            }
+        }
 
         // operation 
         function doOperation() {
@@ -566,21 +587,22 @@
             if (n == 4 || n == 5 || n == 6 || n == 7 || n == 8 || n == 9) {
                 const id = document.getElementById('input1').value;
                 const amount = document.getElementById('input2').value;
-                doPayment(rec, id, amount, n);
+                chachAmount(amount) ? doPayment(rec, id, amount, n) : null;
             } else if (n == 1) {
                 const amount = document.getElementById('input1').value;
-                withdraw(amount, n);
+                chachAmount(amount) ? withdraw(amount, n) : null;
             } else if (n == 2) {
                 const card_number = document.getElementById('input1').value;
                 const amount = document.getElementById('input2').value;
-                toCard(card_number, amount, n)
+                chachAmount(amount) ? toCard(card_number, amount, n) : null;
             } else if (n == 3) {
                 const amount = document.getElementById('input1').value;
-                top_up(amount, n);
+                chachAmount(amount) ? top_up(amount, n) : null;
             } else {
                 console.log("n is not suitable");
             }
-
+            document.getElementById('input2').value = "";
+            document.getElementById('input1').value = "";
         }
 
         // show input menu by number n
@@ -662,8 +684,13 @@
 
                 const data = await response.json();
                 const amount = data.balance;
+                const cardNumber = data.cardNumber;
+                const formattedCardNumber = cardNumber.match(/.{1,4}/g).join(' ');
 
                 document.getElementById('credit-balance').textContent = `₴ ${amount}`; 
+
+                cardNumb = document.getElementById('card-number');
+                cardNumb.textContent = formattedCardNumber;
 
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
@@ -723,6 +750,7 @@
                     <p class="credit-p">Credit Card</p>
                     <p class="credit-balance-p">Total Balance</p>
                     <p class="credit-balance" id="credit-balance">₴ 0</p>
+                    <p class="card-number" id="card-number"></p>
                 </div>
                 <p class="right-p">DIYBank</p>
             </div>
