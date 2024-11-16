@@ -146,6 +146,8 @@
   <ItemGroup>
     <ClInclude Include="ATM.h" />
     <ClInclude Include="DataBase.h" />
+    <ClInclude Include="IDataBase.h" />
+    <ClInclude Include="Test_ATM.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="authorization.html" />

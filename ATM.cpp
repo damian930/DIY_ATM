@@ -1,6 +1,7 @@
 #include "ATM.h"
+using std::string;
 
-ATM::ATM(Database& db)
+ATM::ATM(IDataBase& db)
 	:currentState(State::Idle), bank(db) {}
 
 

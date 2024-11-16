@@ -1,22 +1,23 @@
 #pragma once
 #include <sqlite3.h>
-#include <string>
-#include <nlohmann/json.hpp> 
-using std::string;
+#include "IDataBase.h"
 
-class Database {
+class Database : public IDataBase {
+    friend void initialiseDatabase(Database& database);
 public:
-    Database(const string& dbName);
+    Database(const std::string& dbName);
     ~Database();
+
+private:
     void createCardsTable();
-    bool insertCard(const string& cardNumber, const string& pin, double balance);
-    bool removeCard(const string& cardNumber);
-    double getCardBalance(const string& cardNumber);
-    nlohmann::json getCardDetails(const string& cardNumber);
-    void addMoney(const string& cardNumber, double amount);
-    void removeMoney(const string& cardNumber, double amount);
-    bool isCardValid(const string& cardNumber);
-    bool isPinCorrect(const string& cardNumber, const string& pin);
+    bool insertCard(const std::string& cardNumber, const std::string& pin, double balance);
+    bool removeCard(const std::string& cardNumber);
+    double getCardBalance(const std::string& cardNumber);
+    nlohmann::json getCardDetails(const std::string& cardNumber);
+    void addMoney(const std::string& cardNumber, double amount);
+    void removeMoney(const std::string& cardNumber, double amount);
+    bool isCardValid(const std::string& cardNumber);
+    bool isPinCorrect(const std::string& cardNumber, const std::string& pin);
     void close();
 
 private:
