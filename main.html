@@ -564,7 +564,7 @@
 
         function chachAmount(amount) {
             amountChecked = amount.match(/^\d*([.]\d{0,2})?$/);
-            if (amountChecked) {
+            if (amountChecked && parseFloat(amount) != 0) {
                 if (parseFloat(amount) > 10000) {
                     printMessage("please, enter max 10000 ₴ value!")
                     return false;
