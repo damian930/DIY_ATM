@@ -220,7 +220,7 @@ bool Database::isCardValid(const string& cardNumber)
     if (!regex_match(cardNumber, cardNumberPattern))
     {
         cerr << "Error: Card number must be exactly 16 digits." << endl;
-        return false;
+        assert(false);
     }
 
     // Check if the card number exists in the database
@@ -239,6 +239,7 @@ bool Database::isCardValid(const string& cardNumber)
     else
     {
         cerr << "Error checking card validity: " << sqlite3_errmsg(db) << endl;
+        assert(false);
     }
 
     sqlite3_finalize(stmt);
@@ -252,7 +253,7 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin)
     if (!regex_match(pin, pinPattern))
     {
         cerr << "Error: PIN must be exactly 4 digits." << endl;
-        return false;
+        assert(false);
     }
 
     // Check if the provided PIN matches the stored PIN for the given card number
@@ -271,6 +272,7 @@ bool Database::isPinCorrect(const string& cardNumber, const string& pin)
     else
     {
         cerr << "Error checking PIN: " << sqlite3_errmsg(db) << endl;
+        assert(false);
     }
 
     sqlite3_finalize(stmt);
