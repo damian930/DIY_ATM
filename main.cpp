@@ -54,7 +54,7 @@ int main() {
 			return crow::response(500, "");
 		}
 		// changes ATM state to Authorization when loading main page 
-		ATM::Error res = diyATM.start();
+		ATM::Result res = diyATM.start();
 		return crow::response(200, html_content);
 	});
 
@@ -90,13 +90,13 @@ int main() {
 		std::string card_number = data["cardNumber"];
 		std::string card_pin = data["pin"];
 
-		ATM::Error res = diyATM.authenticator(card_number, card_pin);
+		ATM::Result res = diyATM.authenticator(card_number, card_pin);
 
 		// Respond back to the client 
 		json response;
-		response["cardNumber"] = res != ATM::Error::WrongCardNum;
-		response["pin"] = res != ATM::Error::WrongPIN;
-		response["notBlocked"] = res != ATM::Error::CardWasBlocked;
+		response["cardNumber"] = res != ATM::Result::WrongCardNum;
+		response["pin"] = res != ATM::Result::WrongPIN;
+		response["notBlocked"] = res != ATM::Result::CardWasBlocked;
 
 		return crow::response(200, response.dump()); // Send the JSON response
 	});
@@ -107,7 +107,7 @@ int main() {
 
 		if (diyATM.getSession() == nullptr)
 			return crow::response(400);
-		ATM::Error res = diyATM.endSession();
+		ATM::Result res = diyATM.endSession();
 
 		return crow::response(200);
 	});
@@ -134,16 +134,19 @@ int main() {
 	CROW_ROUTE(app, "/withdraw").methods("POST"_method)([&diyATM](const crow::request& req) {
 		// Parse the JSON body
 		auto data = json::parse(req.body);
+
+		// Might throw a 500 error, if cant convert provided string to double; Should be handled on the front - end.
+		// It could also be handled here, but for the sake of simplicity, we leave it as it is.
 		double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
 		if (diyATM.getSession() == nullptr)
 			return crow::response(400);
-		ATM::Error success = diyATM.getSession()->withdraw(amount);
-		// can throw ATM::Error::BadMoneyValue
+		ATM::Result success = diyATM.getSession()->withdraw(amount);
+		// can throw ATM::Result::BadMoneyValue
 
 		// Respond back to the client 
 		json response;
-		response["enoughMoney"] = success != ATM::Error::NotEnoughMoney;
+		response["enoughMoney"] = success != ATM::Result::NotEnoughMoney;
 
 		return crow::response(200, response.dump());
 
@@ -155,17 +158,20 @@ int main() {
 			// Parse the JSON body
 			auto data = json::parse(req.body);
 			std::string card_number_to = data["cardNumber_to"];
+
+			// Might throw a 500 error, if cant convert provided string to double; Should be handled on the front - end.
+			// It could also be handled here, but for the sake of simplicity, we leave it as it is.
 			double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
 			if (diyATM.getSession() == nullptr)
 				return crow::response(400);
-			ATM::Error success = diyATM.getSession()->transfer(card_number_to, amount);
-			// can throw ATM::Error::BadMoneyValue
+			ATM::Result success = diyATM.getSession()->transfer(card_number_to, amount);
+			// can throw ATM::Result::BadMoneyValue
 
 			// Respond back to the client 
 			json response;
-			response["cardNumber"] = success != ATM::Error::WrongCardNum;
-			response["enoughMoney"] = success != ATM::Error::NotEnoughMoney;
+			response["cardNumber"] = success != ATM::Result::WrongCardNum;
+			response["enoughMoney"] = success != ATM::Result::NotEnoughMoney;
 
 			return crow::response(200, response.dump());
 	});
@@ -175,12 +181,15 @@ int main() {
 		{
 			// Parse the JSON body
 			auto data = json::parse(req.body);
+
+			// Might throw a 500 error, if cant convert provided string to double; Should be handled on the front - end.
+			// It could also be handled here, but for the sake of simplicity, we leave it as it is.
 			double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
 			if (diyATM.getSession() == nullptr)
 				return crow::response(400);
-			ATM::Error res = diyATM.getSession()->deposit(amount);
-			// can throw ATM::Error::BadMoneyValue
+			ATM::Result res = diyATM.getSession()->deposit(amount);
+			// can throw ATM::Result::BadMoneyValue
 
 			json response;
 			response["enoughMoney"] = true;
@@ -194,17 +203,20 @@ int main() {
 			auto data = json::parse(req.body);
 			string recipient = data["recipient"];
 			string userID = data["user_id"];
+
+			// Might throw a 500 error, if cant convert provided string to double; Should be handled on the front - end.
+			// It could also be handled here, but for the sake of simplicity, we leave it as it is.
 			double amount = std::stod(data["amount"].get<nlohmann::json::string_t>());
 
 			if (diyATM.getSession() == nullptr)
 				return crow::response(400);
-			ATM::Error res = diyATM.getSession()->paymentMenu(recipient, userID, amount);
-			// can throw ATM::Error::BadMoneyValue
+			ATM::Result res = diyATM.getSession()->paymentMenu(recipient, userID, amount);
+			// can throw ATM::Result::BadMoneyValue
 
 			// Respond back to the client 
 			json response;
-			response["enoughMoney"] = res != ATM::Error::NotEnoughMoney;
-			response["correctID"] = res != ATM::Error::WrongCardNum;
+			response["enoughMoney"] = res != ATM::Result::NotEnoughMoney;
+			response["correctID"] = res != ATM::Result::WrongCardNum;
 
 			return crow::response(200, response.dump());
 	});

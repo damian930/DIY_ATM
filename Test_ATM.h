@@ -113,16 +113,16 @@ public:
 
 	void test_Using_ATM_before_booting_up_the_system() {
 		// cant start using ATM without booting up the system
-		assert(_atm.authenticator("wrongstate", "wrongstate") == ATM::Error::WrongATMState);
+		assert(_atm.authenticator("wrongstate", "wrongstate") == ATM::Result::WrongATMState);
 	}
 
 	void test_Authorising_with_invalid_data() {
 		_atm.start();
-		assert(_atm.authenticator("0000000000000000", "1111") == ATM::Error::WrongCardNum);
+		assert(_atm.authenticator("0000000000000000", "1111") == ATM::Result::WrongCardNum);
 		_atm.start();
-		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Error::WrongPIN);
-		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Error::WrongPIN);
-		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Error::CardWasBlocked);
+		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Result::WrongPIN);
+		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Result::WrongPIN);
+		assert(_atm.authenticator("1111111111111111", "2222") == ATM::Result::CardWasBlocked);
 		_atm.endSession();
 	}
 
@@ -132,7 +132,7 @@ public:
 		_atm.authenticator("1111111111111111", "1111");
 		double card_original_balance = _atm.getSession()->accBalance();
 		// >10k operations are forbidden now
-		//assert(_atm.getSession()->withdraw(card_original_balance + 0.01) == ATM::Error::NotEnoughMoney); 
+		//assert(_atm.getSession()->withdraw(card_original_balance + 0.01) == ATM::Result::NotEnoughMoney); 
 		assert(_atm.getSession()->accBalance() == card_original_balance);
 		_atm.endSession();
 	}
@@ -146,12 +146,12 @@ public:
 		_atm.authenticator("1111111111111111", "1111");
 		
 		// invalid card
-		assert(_atm.getSession()->transfer("1111111999111111", 999) == ATM::Error::WrongCardNum);
+		assert(_atm.getSession()->transfer("1111111999111111", 999) == ATM::Result::WrongCardNum);
 
 		// not enough money
 		double card_original_balance = _atm.getSession()->accBalance();
 		// >10k operations are forbidden now
-		//assert(_atm.getSession()->transfer("1111111111111111", card_original_balance + 0.01) == ATM::Error::NotEnoughMoney);
+		//assert(_atm.getSession()->transfer("1111111111111111", card_original_balance + 0.01) == ATM::Result::NotEnoughMoney);
 
 		_atm.endSession();
 	}
@@ -163,7 +163,7 @@ public:
 		// not enough money
 		double card_original_balance = _atm.getSession()->accBalance();
 		// >10k operations are forbidden now
-		//assert(_atm.getSession()->paymentMenu("placeholder", "placeholder", card_original_balance + 0.01) == ATM::Error::NotEnoughMoney); 
+		//assert(_atm.getSession()->paymentMenu("placeholder", "placeholder", card_original_balance + 0.01) == ATM::Result::NotEnoughMoney); 
 
 		_atm.endSession();
 	}

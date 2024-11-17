@@ -6,15 +6,15 @@ class ATM
 public:
 	class Session;
 	enum class State;
-	enum class Error;
+	enum class Result;
 
 	ATM(IDataBase& db);
 	~ATM() { delete currentSession; };
 
-	ATM::Error start();
-	ATM::Error authenticator(const std::string& cardNum, const std::string& pin);
+	ATM::Result start();
+	ATM::Result authenticator(const std::string& cardNum, const std::string& pin);
 	Session* const getSession() { return currentSession; };
-	ATM::Error endSession();
+	ATM::Result endSession();
 
 private:
 	void setState(State state) { currentState = state; }
@@ -38,10 +38,10 @@ public:
 	~Session() {};
 	nlohmann::json accInfo() { return _atm.getAccInfo(_cardNum); };
 	double accBalance() { return _atm.getAccBalance(_cardNum); };
-	ATM::Error withdraw(double);
-	ATM::Error deposit(double);
-	ATM::Error transfer(const std::string&, double);
-	ATM::Error paymentMenu(const std::string&, const std::string&, double);
+	ATM::Result withdraw(double);
+	ATM::Result deposit(double);
+	ATM::Result transfer(const std::string&, double);
+	ATM::Result paymentMenu(const std::string&, const std::string&, double);
 	
 private:
 	Session(ATM& myatm, const std::string& info) :_atm(myatm), _cardNum(info) {}
@@ -58,7 +58,7 @@ enum class ATM::State
 	ActionMenu
 };
 
-enum class ATM::Error
+enum class ATM::Result
 {
 	EverythingIsFine = 0,
 	WrongATMState,
